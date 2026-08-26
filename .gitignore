@@ -1,0 +1,34 @@
+# ===== 排除不需要的内容 =====
+
+# 工具/Agent 生成物
+.claude/
+.claude/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+
+# 临时文件
+*.tmp
+*.bak
+~$*
+
+# 密钥与敏感信息（永远不要提交！）
+*.env
+.env.*
+*.key
+*.pem
+config.local.json
+
+# Python（万一以后加代码）
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
