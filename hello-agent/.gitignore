@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+1/
+
+# 编辑器 / 系统临时文件
+.vscode/
+.idea/
+~$*
+*.tmp
