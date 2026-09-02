@@ -151,6 +151,37 @@ long_term_memory = LongTermMemory()
 rag = get_rag()
 
 
+def _remember_long_term(key: str, value: str):
+    """
+    把模型输出的 [[REMEMBER]] 内容写入长期记忆（跨会话持久）。
+
+    之前这段内容只进了 session memory，重启进程就丢了——
+    这正是"记住 X 但下次打开程序不记得"的根源。
+    这里补上 session → long_term 这一步。
+
+    去重：如果最后一条记忆内容相同，跳过（防止连续重复写入）。
+    """
+    content = f"{key}: {value}"
+    if long_term_memory.entries and long_term_memory.entries[-1]["content"] == content:
+        return
+    long_term_memory.add(content, tags=["REMEMBER"], source="agent")
+
+
+def _log_tool_interaction(user_query: str, tool_call_count: int):
+    """
+    自动记录一次调用了工具的用户交互。
+
+    改进点：
+    - 不再用 user_query[:50] 硬截断（会把长路径截成半截垃圾）
+    - 连续重复内容跳过，防止刷屏
+    """
+    summary = user_query if len(user_query) <= 80 else user_query[:80] + "…"
+    content = f"用户询问「{summary}」，共调用 {tool_call_count} 个工具完成回答"
+    if long_term_memory.entries and long_term_memory.entries[-1]["content"] == content:
+        return
+    long_term_memory.add(content, tags=["工具调用"], source="agent")
+
+
 def run_agent(user_query: str, verbose: bool = False) -> str:
     """
     增强版 agent loop。
@@ -203,7 +234,7 @@ def run_agent(user_query: str, verbose: bool = False) -> str:
 
         # 模型想调工具
         if msg.tool_calls:
-            messages.append(msg)
+            messages.append(msg.model_dump(exclude_none=True))
             for tc in msg.tool_calls:
                 tool_name = tc.function.name
                 try:
@@ -226,13 +257,13 @@ def run_agent(user_query: str, verbose: bool = False) -> str:
 
         # 模型直接回答了
         content = msg.content or ""
-        session_memory.update_from_message(content)
+        # 1) 解析 [[REMEMBER]]：写入会话记忆 + 长期记忆（跨会话持久）
+        remembered = session_memory.update_from_message(content)
+        for key, value in remembered:
+            _remember_long_term(key, value)
+        # 2) 自动记录"调用过工具"的交互（去重）
         if tool_call_count > 0:
-            long_term_memory.add(
-                f"用户询问「{user_query[:50]}」，共调用 {tool_call_count} 个工具完成回答",
-                tags=["工具调用"],
-                source="agent",
-            )
+            _log_tool_interaction(user_query, tool_call_count)
         clean_content = re.sub(
             r"\[\[REMEMBER:\s*.+?\]\].*?\[\[/REMEMBER\]\]",
             "",

@@ -94,19 +94,23 @@ class SessionMemory:
             lines.append(f"- {k}: {v}")
         return "\n".join(lines)
 
-    def update_from_message(self, content: str):
+    def update_from_message(self, content: str) -> list[tuple[str, str]]:
         """
         从模型的回复中解析 [[REMEMBER: key]] value [[/REMEMBER]] 并存储。
 
+        返回解析出的 (key, value) 列表——调用方（main.py）据此把内容
+        同时写入长期记忆，否则"记住 X"重启后就丢了。
+
         正则拆解：
-        \[\[REMEMBER:\s*(.+?)\]\]  匹配标签开头 + key（非贪婪）
-        \s*(.+?)                   匹配 value（非贪婪）
-        \[\[/REMEMBER\]\]          匹配标签结尾
+        \\[\\[REMEMBER:\\s*(.+?)\\]\\]  匹配标签开头 + key（非贪婪）
+        \\s*(.+?)                      匹配 value（非贪婪）
+        \\[\\[/REMEMBER\\]\\]          匹配标签结尾
         """
         pattern = r"\[\[REMEMBER:\s*(.+?)\]\]\s*(.+?)\[\[/REMEMBER\]\]"
         matches = re.findall(pattern, content, re.DOTALL)
         for key, value in matches:
             self.set(key.strip(), value.strip())
+        return [(k.strip(), v.strip()) for k, v in matches]
 
 
 # ─────────────────────────────────────────────
@@ -225,11 +229,19 @@ def manage_context_window(messages: list[dict], max_turns: int = 10) -> list[dic
 
     # 保留尾部最近的消息
     kept = other_msgs[-keep_count:]
-    removed_count = len(other_msgs) - keep_count
+    removed_count = len(other_msgs) - len(kept)
+
+    # 修复 tool 消息配对：裁剪只发生在头部（保留尾部），
+    # 如果裁剪后第一条是 role == "tool"，说明它对应的 assistant tool_calls
+    # 消息已经被裁掉了——必须连它一起丢掉，否则 API 会报错
+    # （tool 消息必须紧跟在调用它的 assistant 消息之后）。
+    while kept and kept[0]["role"] == "tool":
+        kept.pop(0)
+        removed_count += 1
 
     summary = {
         "role": "system",
-        "content": f"[上下文已压缩] 早期 {removed_count} 条消息已被移除，保留了最近 {keep_count} 条。",
+        "content": f"[上下文已压缩] 早期 {removed_count} 条消息已被移除，保留了最近 {len(kept)} 条。",
     }
 
     return system_msgs + [summary] + kept
