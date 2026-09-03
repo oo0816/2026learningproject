@@ -1,0 +1,35 @@
+[2026-09-03 20:28:55] [INFO] [registry] 注册工具 'calculator'（risk=safe）
+[2026-09-03 20:28:55] [INFO] [registry] 注册工具 'get_weather'（risk=safe）
+[2026-09-03 20:28:55] [INFO] [registry] 注册工具 'web_search'（risk=safe）
+[2026-09-03 20:28:55] [INFO] [registry] 注册工具 'send_email'（risk=needs_approval）
+[2026-09-03 20:28:55] [INFO] [session] 新会话：20260903-202855-047
+[2026-09-03 20:29:30] [INFO] [agent] step 1：调用模型…
+[2026-09-03 20:29:35] [INFO] [session] 会话 '20260903-202855-047' 已保存（共 3 条消息）
+[2026-09-03 20:29:42] [INFO] [agent] step 1：调用模型…
+[2026-09-03 20:29:43] [INFO] [session] 会话 '20260903-202855-047' 已保存（共 5 条消息）
+[2026-09-03 20:29:50] [INFO] [agent] step 1：调用模型…
+[2026-09-03 20:29:52] [INFO] [session] 会话 '20260903-202855-047' 已保存（共 7 条消息）
+[2026-09-03 20:29:59] [INFO] [agent] step 1：调用模型…
+[2026-09-03 20:30:00] [INFO] [session] 会话 '20260903-202855-047' 已保存（共 9 条消息）
+[2026-09-03 20:30:17] [INFO] [agent] step 1：调用模型…
+[2026-09-03 20:30:19] [INFO] [session] 会话 '20260903-202855-047' 已保存（共 11 条消息）
+[2026-09-03 20:59:50] [INFO] [registry] 注册工具 'calculator'（risk=safe）
+[2026-09-03 20:59:50] [INFO] [registry] 注册工具 'get_weather'（risk=safe）
+[2026-09-03 20:59:50] [INFO] [registry] 注册工具 'web_search'（risk=safe）
+[2026-09-03 20:59:50] [INFO] [registry] 注册工具 'send_email'（risk=needs_approval）
+[2026-09-03 20:59:50] [INFO] [agent] step 1：调用模型…
+[2026-09-03 20:59:52] [INFO] [tool] calculator args={"expression": "1+2*3"} → 7 (0ms)
+[2026-09-03 20:59:52] [INFO] [agent] step 2：调用模型…
+[2026-09-03 20:59:53] [INFO] [registry] 注册工具 'calculator'（risk=safe）
+[2026-09-03 20:59:53] [INFO] [registry] 注册工具 'get_weather'（risk=safe）
+[2026-09-03 20:59:53] [INFO] [registry] 注册工具 'web_search'（risk=safe）
+[2026-09-03 20:59:53] [INFO] [registry] 注册工具 'send_email'（risk=needs_approval）
+[2026-09-03 20:59:53] [INFO] [agent] step 1：调用模型…
+[2026-09-03 20:59:55] [INFO] [tool] get_weather args={"city": "北京"} → 北京：5°C，晴朗，北风3级 (0ms)
+[2026-09-03 20:59:55] [INFO] [tool] get_weather args={"city": "深圳"} → 深圳：20°C，小雨，南风1级 (0ms)
+[2026-09-03 20:59:55] [INFO] [agent] step 2：调用模型…
+[2026-09-03 20:59:57] [INFO] [registry] 注册工具 'calculator'（risk=safe）
+[2026-09-03 20:59:57] [INFO] [registry] 注册工具 'get_weather'（risk=safe）
+[2026-09-03 20:59:57] [INFO] [registry] 注册工具 'web_search'（risk=safe）
+[2026-09-03 20:59:57] [INFO] [registry] 注册工具 'send_email'（risk=needs_approval）
+[2026-09-03 20:59:57] [INFO] [agent] step 1：调用模型…
