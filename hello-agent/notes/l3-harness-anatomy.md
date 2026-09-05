@@ -141,3 +141,70 @@ schema 的完整结构（OpenAI function-calling 格式，见 730–745）：
 | 5 上下文压缩 | ✅ 基本对 | 「3 万」是字符非 token；要补「头部孤儿 tool 连删」 |
 
 > 配套的精读问答笔记见 [l3-nano-harness-qna.md](l3-nano-harness-qna.md)。
+
+---
+
+## B线 ①：你的 nano harness vs learn-claude-code —— 3 点差异
+
+> 对比对象：clone 自 `learn-claude-code` 仓库（根目录，17 章递进课程），核心对比的是第一课 [s01_agent_loop/code.py](../learn-claude-code/s01_agent_loop/code.py)（143 行，刻意做到最小的 agent loop）。
+> s01 = 主循环骨架（一个 bash 工具 + while True），只保留核心，护栏留给后续章节教。
+
+### 差异① 安全模型：命令黑名单 vs 分级权限
+
+| | s01 | 我的 nano harness |
+|---|---|---|
+| 做法 | `run_bash` 里一个字符串列表挡危险命令 | PermissionGate 三级 + 显式规则 + 保底 deny |
+| 思路 | **黑名单**：知道哪些不能碰，挡住它们 | **白名单/分级**：不知道的默认不放行（fail-closed） |
+| 深度 | 挡几个已知字符串，换个写法就绕过 | safe 自动过 / needs_approval 问人 / blocked 直接拒 |
+
+**一句话：s01 只防「已知的坏」，PermissionGate 防「一切未知」——黑名单靠记仇，白名单靠信任边界。**（这正是 learn-claude-code 里 s03 才教的，我已内建进 nano。）
+
+### 差异② 工具系统：1 个写死的常量 vs 数据驱动注册表
+
+| | s01 | 我的 nano harness |
+|---|---|---|
+| 工具数 | 1 个（bash） | 4 个 + 可扩展 |
+| 定义方式 | `TOOLS = [...]` 写死在模块顶层 | `TOOL_DEFINITIONS` + `ToolRegistry.register()` + schema 校验 |
+| 加工具 | 得改执行逻辑 | 加函数 + 加一条 dict，Agent 和 loop 不动 |
+
+**一句话：s01 的工具是「固定的一只手」，我的是「可插拔的工具箱」**（learn-claude-code s02 的核心教学点，我已会）。
+
+### 差异③ 生命周期：无记忆无护栏 vs 会话落盘 + 步数/超时护栏
+
+| | s01 | 我的 nano harness |
+|---|---|---|
+| 循环 | `while True` 裸转，无上限无超时 | `for range(MAX_STEPS)` + TIMEOUT 检查 |
+| 记忆 | history 是内存 list，程序退出全丢 | SessionStore 存 sessions/*.json，跨启动恢复 |
+| 日志 | 只有 print | Logger 分级 → 屏幕 + logs/agent.log |
+
+**一句话：s01 是「一次性的裸循环」，我的是「能存盘、能刹车、能留痕」的工程件**（这就是它 143 行、我 1250 行的原因）。
+
+> ⚠️ 诚实校准：s01 是课程刻意做到最小的展示品。真正和我 nano 同级的是 s01+s02+s03+s08 的集合——**我一人写的 nano 相当于人家 1/3 课程的积累**（L1→L3 一路攒出来）。反过来对整门课（s01-s17），我 nano 还缺：subagent(s06)、按需 skill(s07)、摘要式压缩(s08 后半)、memory 三层(s09)、任务系统(s10)、后台任务(s11)、cron(s12)、agent 团队(s13)、MCP(s14)——正是 L4/L5 要补的。
+
+---
+
+## B线 ②：subagent 是什么 + 给我的 harness 加 subagent 改哪
+
+### subagent = 子代理 = 父 agent 派出去的另一个 agent
+
+父 agent 遇到大任务，把其中一块独立任务「外包」给一个**全新的、有自己的循环、自己独立上下文**的 agent，让它专心干完，只把最终答案交回来。
+
+- **类比**：主管（父）负责全局，遇到「调研这个库怎么用」这种独立活 → 派下属（subagent）专门做；下属带着自己的任务清单（fresh messages）离开，干完只汇报一句总结（final text）；中间过程不污染主管的脑子（**上下文隔离**）。
+
+### learn-claude-code s06 的实现要点
+
+1. **subagent = 父 agent 的一个普通工具**：`TASK_TOOL` 注册进工具清单，handler 是 `run_subagent`——模型觉得该外包时调 `task`，和调 get_weather 无本质区别。
+2. **`run_subagent()` 内部是第二个完整 loop**：`messages = [prompt]` 全新开始（不继承父历史），for 30 次自己跑模型/执行工具，最后只 return 最终文本。
+3. **防无限套娃**：subagent 的工具清单里**没有** task 工具，所以它不能再次委派。
+
+### 给我的 nano harness 加 subagent：架构上改哪？
+
+**结论：不需要动 Agent / loop / PermissionGate 任何代码**——因为 L3 的「数据驱动扩展」已经把路铺好了。subagent 在我的设计里只是**另一种工具**：
+
+| 要改 | 加什么 | 对应位置 |
+|---|---|---|
+| 写一个函数 | `run_subagent(prompt)`：内部新建一个干净 Agent 跑一次 `run(prompt)`，return 答案 | 内置工具区 |
+| TOOL_DEFINITIONS 加一条 | `{"name":"task", "func":run_subagent, "risk_level":"safe", "schema":{...}}` | 列表末尾 |
+| 防套娃 | 复用 create_agent 时不给 sub 注册 task 工具 | 由「干净 Agent」设计自然规避 |
+
+**一句话：在我的 harness 里，subagent = 一个会再跑一个 Agent 的工具。加它 = 加函数 + 注册一行，主循环一行不用改。**

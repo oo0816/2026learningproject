@@ -32,3 +32,6 @@ __pycache__/
 .venv/
 venv/
 .pytest_cache/
+
+# 外部参考仓库（独立 clone，有自己的 .git，主仓库不追踪）
+learn-claude-code/
