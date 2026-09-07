@@ -1,6 +1,7 @@
 # 日语CS专业课复习文档生成器 (japanese-exam-review)
 
-[![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-6C4DF6)](https://claude.ai/code)
+[![Agent Skills Standard](https://img.shields.io/badge/Agent%20Skills-Standard-6C4DF6)](https://skills.sh)
+[![Multi-Runtime](https://img.shields.io/badge/Multi-Runtime-ready-3EA639)](https://skills.sh)
 
 根据**日语授课的 CS 专业课课件**（PDF 讲义 / PPTX）和**历年试卷**，生成中日对照的复习文档 PDF。支持 PDF 讲义和 PPTX 两种源文件。
 
@@ -49,7 +50,7 @@ japanese-exam-review/
 ## 安装
 
 ```bash
-# 1. 放进 Claude Code skills 目录（或在 skills 工程内直接使用）
+# 1. 放进本机/项目的 skills 目录（个人版 `~/.claude/skills`、项目版 `.claude/skills`；或在 skills 工程内直接使用）
 git clone <repo> .claude/skills/japanese-exam-review
 
 # 2. 依赖
@@ -64,7 +65,7 @@ mkdir ppt exams
 
 ## 使用
 
-在 Claude Code 中输入**日语相关 + CS 专业课**的请求：
+对支持 agent skills 的 AI 助手（Claude Code / Codex / Cursor 等）输入**日语相关 + CS 专业课**的请求：
 
 ```
 > 帮我把日语的计算机网络PPT整理成复习文档
