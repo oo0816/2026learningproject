@@ -330,6 +330,32 @@ japanese-exam-review/
 
 ---
 
+## 动手验证：手写最小 MCP server + client（2026-09-07 补充）
+
+> 配合 [`mcp_mini_server.py`](../projects/l4-skills-mcp/mcp_mini_server.py) 与 [`mcp_mini_client.py`](../projects/l4-skills-mcp/mcp_mini_client.py)，纯标准库、零 SDK，在 L4 项目目录实机跑通四步会话。跑法：`python mcp_mini_client.py`。
+
+**实机跑通的四条消息**（与 Q3 逐字对应）：
+
+```
+① {"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}
+   ← {"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05",
+      "capabilities":{"tools":{}},"serverInfo":{"name":"mcp-mini-server","version":"0.1.0"}}}
+② {"jsonrpc":"2.0","method":"notifications/initialized","params":{}}   ← 无 id，server 不回应
+③ {"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}
+   ← 返回 tools 数组，每项含 name/description/inputSchema(JSON Schema)
+④ {"jsonrpc":"2.0","id":3,"method":"tools/call",
+   "params":{"name":"get_weather","arguments":{"city":"北京"}}}
+   ← {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"北京：晴，26°C"}],"isError":false}}
+```
+
+**这次动手验证出的三个要点**：
+
+1. **协议确实只是"接线员"**：真正的天气逻辑藏在 server 里的假天气库，protocol 层只负责听懂 `tools/call`、把结果包成 `content` 回出去——Q3 的"server 只做翻译"落到实机。
+2. **数据驱动分发表**：server 主循环只认识方法名，`DISPATCH` 字典把方法映射到处理函数、加方法只改表不动循环（和 L3 学过的"加工具 = 加数据不加逻辑"是同一个思想）。
+3. **`id` 配对的实感**：`initialize` id=1、`tools/list` id=2、`tools/call` id=3，client 递增、server 原样带回——乱序也能对上。通知（无 id）发完就走、不回。
+
+---
+
 ## 高频易错点清单（复习用）
 
 1. **四者不在同一层**：Tool=最小能力，Skill=方法论知识包，MCP=接工具/数据的协议，A2A=agent↔agent 的协议。别拿它们做"四选一"。

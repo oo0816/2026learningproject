@@ -26,6 +26,21 @@ python -m mcp_server_filesystem ./test_data/
 npx @modelcontextprotocol/inspector
 ```
 
+## 手写最小 MCP Server（纯标准库，零依赖）
+
+配套文件（2026-09-07 亲手写的协议 demo）：
+
+| 文件 | 作用 |
+|---|---|
+| `mcp_mini_server.py` | MCP Server 端：JSON-RPC 2.0 over stdio，实现 initialize / tools/list / tools/call，暴露一个假天气工具 |
+| `mcp_mini_client.py` | MCP Client 端：把 server 当子进程拉起，走完四步握手并把每条报文原样打印 |
+
+```bash
+python mcp_mini_client.py
+```
+
+跑完会看到 Q3 笔记那 4 条消息的实机版——这就是"protocol 长什么样"的答案落地。
+
 ## B 线验证
 
 - [ ] 一个 SKILL.md 被 agent 加载后，agent 的 system prompt 里多了什么？
