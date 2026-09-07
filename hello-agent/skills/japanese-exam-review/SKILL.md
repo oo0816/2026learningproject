@@ -38,7 +38,7 @@ short_description: 根据日语授课的CS课件和试卷自动生成复习文�
 
 ## 前置确认（必须执行）
 
-> **!! 强制执行 !!** — 未获得用户明确答复前，**禁止**解析任何文件或生成内容。
+> **🔴 强制检查点** — 未获得用户明确答复前，**禁止**解析任何文件或生成内容。上面的问题必须问清并得到答复，否则就停下。
 
 用 AskUserQuestion 确认（按需，不用全问）：
 
@@ -132,15 +132,15 @@ short_description: 根据日语授课的CS课件和试卷自动生成复习文�
    # add_figure 传完整图片路径，如 os.path.join(IMG, "2024CN_02(1)_p4_img26.png")
    pdf.output(os.path.join(BASE, "output", "review.pdf"))
    ```
-2. 运行 `python scripts/build_review.py`，翻 `output/review.pdf` 目验与样张同味。
+2. 运行 `python scripts/build_review.py`；**🔴 目验** `output/review.pdf` 与样张同味，不符先回改，不交付。
 3. 参照 `scripts/build_sample_a.py` 学习写法和节奏。
 
 ### 通路 B — JSON（大课件 / 批量 / 需覆盖率迭代）
 
 1. 写内容 JSON（规范与示例见下、字段见 [path_b_render.py](scripts/path_b_render.py) 头注释）。
-2. 覆盖核查：`python scripts/check_coverage.py <content.json>`（目标 ≥85%）。
+2. 覆盖核查：`python scripts/check_coverage.py <content.json>`（目标 ≥85%）；报 0% 或不达标 → 查「失败模式与兜底」表。
 3. 渲染：`python scripts/path_b_render.py <content.json> -o output/review.pdf`。
-4. 目验同味。参照 `output/sample_b.pdf`。
+4. **🔴 目验** 与样张同味，不符先回改，不交付。参照 `output/sample_b.pdf`。
 
 ---
 
@@ -179,9 +179,26 @@ short_description: 根据日语授课的CS课件和试卷自动生成复习文�
 
 ---
 
+## 失败模式与兜底（先想失败再动手）
+
+遇到下表症状按行处理，**不许硬闯、不许静默跳过**：
+
+| 症状 / 触发 | 一线处理 | 仍失败 → 兜底 |
+|------------|---------|--------------|
+| 解析 0 页 / 文本乱码（PDF 文字层抽不出或日文错乱） | 换 PyMuPDF 直抽正文，或换 parse 脚本重试 | 告知用户该讲义无法自动读取，请提供文字版/清晰扫描；**不得**凭空编内容硬生成 |
+| 本会话读不了图（无视觉） | 用 PyMuPDF 图块位置 + 邻近文字佐证图内容，只选可确证图 | 宁缺毋滥：重点改以文字/表格承载，不放入未经核实的图 |
+| 讲义本页无重点图 | 直接不放图（不凑数） | — |
+| 覆盖 <85%（逐页对照或 check_coverage） | 对照解析逐页补漏 → 重跑覆盖率 | 解析本身不全 → 按实际可读页数说明覆盖口径并如实告知，不强撑数字 |
+| check_coverage.py 报 0% / 报错 | 确认 content.json 用的是现行 schema 块（`table`/`para`/`figure`/`exam`），再重跑 | 手工逐页对照做覆盖判断 |
+| 渲染报错 / missing glyphs 缺字形 | 按警告改写避开缺字（`・` 已自动转 `·`；`⇔` 等改换说法） | 把具体缺字报给用户定替换词；**不**为此引入第二字体 |
+| fonts 缺失（"字体注册失败"） | 把 `simsun.ttc` 放进 `fonts/`（引擎自动取 `simsun_extracted.ttf`，回退 ttc） | 停止并提示装字体 |
+| 考点模式只有回忆版、无正式卷 | 红字/★ 标"同学回忆 · 講義重点"，**不**写正式年号题号 | 连回忆题都没有 → 退回复习模式只标講義重点 |
+| 用户要的课本机没有对应课件/试卷 | 🔴 前置确认拦下并索要材料 | **禁止**拿其他科目样张或通用知识硬套成该课的 PDF |
+
+---
+
 ## 注意事项
 
-- **字体**：引擎自动加载 `fonts/simsun_extracted.ttf`（回退 `fonts/simsun.ttc`）。其余 Noto 字体已不参与渲染（历史遗留，可清理）。启动报"字体注册失败"＝ fonts/ 缺失。
-- **缺字形**：生成时若出现 `missing glyphs: '…'` 警告，说明内容用了 SimSun 没有的字，改写法避开（不要为此引入第二字体）。已知规避：`・` 已自动转 `·`。
+- **字体/缺字形**：引擎加载 `fonts/simsun_extracted.ttf`（回退 `fonts/simsun.ttc`）；缺字形警告＝内容用了 SimSun 没有的字 → 按「失败模式与兜底」表改写，不引入第二字体。Noto 等旧字体已不参与渲染。
 - **脚本位置**：均在 `scripts/`，图片在 `output/images/`；解析脚本会覆盖 `output/parsed_*.json`。
 - **旧引擎已删除**：`scripts/generate_pdf.py`（reportlab 数据驱动）已退役并从仓库移除，新产出一律走 guide_style（A 直写）或 path_b_render（B JSON）。
