@@ -1,32 +1,65 @@
-"""Coverage checker: compare parsed slides against content JSON.
-Reports pages with no coverage and potential missed terms.
+"""Coverage checker: compare parsed slides against a Path-B content JSON.
+
+Current schema blocks handled: para / heading / exam / figure / table
+(old reportlab-era term_table / concept_card are gone — no longer counted).
+
+Usage:
+    python scripts/check_coverage.py <content.json>
+
+Reads parsed text from output/parsed_ppt.json (run a parser first).
+Reports pages whose text matches none of the content's covered terms.
 """
 import json
+import re
 import sys
 from pathlib import Path
-from collections import Counter
 
 
 def extract_terms(text):
     """Extract potential technical terms from Japanese text.
-    Simple heuristic: 2+ kanji/katakana sequences.
+    Simple heuristic: 2+ kanji/katakana/acronym sequences.
     """
-    import re
-    # Katakana words (2+ chars)
-    katakana = re.findall(r'[゠-ヿ･-ﾟ]{2,}', text)
-    # Kanji compounds (2+ chars)
-    kanji = re.findall(r'[一-鿿]{2,}', text)
-    # English acronyms (2+ uppercase)
-    english = re.findall(r'[A-Z]{2,}', text)
+    katakana = re.findall(r"[゠-ヿ･-ﾟ]{2,}", text)
+    kanji = re.findall(r"[一-鿿]{2,}", text)
+    english = re.findall(r"[A-Z]{2,}", text)
     return set(katakana + kanji + english)
+
+
+def covered_terms_from(content):
+    """Collect terms the content actually covers (new schema block types)."""
+    terms = set()
+
+    def add_text(*parts):
+        for p in parts:
+            if isinstance(p, str) and p.strip():
+                terms.update(extract_terms(p))
+
+    for section in content.get("sections", []):
+        add_text(section.get("jp", ""), section.get("cn", ""))
+        for block in section.get("blocks", []):
+            kind = block.get("type")
+            if kind in ("para", "heading", "exam"):
+                add_text(block.get("text", ""))
+            elif kind == "figure":
+                add_text(block.get("caption_cn", ""), block.get("caption_detail", ""))
+            elif kind == "table":
+                cells = list(block.get("headers", []))
+                for row in block.get("rows", []):
+                    cells += [str(c) for c in row]
+                add_text(" ".join(cells))
+            # unknown block type -> ignore (renderer would also reject it)
+    return terms
 
 
 def main():
     parsed_path = Path("output/parsed_ppt.json")
-    content_path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("output/content_mode1.json")
+    if len(sys.argv) < 2:
+        print("usage: python scripts/check_coverage.py <content.json>")
+        sys.exit(2)
+    content_path = Path(sys.argv[1])
 
     if not parsed_path.exists():
-        print("ERROR: output/parsed_ppt.json not found. Run parser first.")
+        print("ERROR: output/parsed_ppt.json not found. Run a parser first.")
         sys.exit(1)
     if not content_path.exists():
         print(f"ERROR: {content_path} not found.")
@@ -37,59 +70,40 @@ def main():
     with open(content_path, "r", encoding="utf-8") as f:
         content = json.load(f)
 
-    # Collect all covered terms from content JSON
-    covered_terms = set()
-    for section in content.get("sections", []):
-        for block in section.get("blocks", []):
-            if block["type"] == "term_table":
-                for row in block.get("rows", []):
-                    if row:
-                        covered_terms.add(row[0])  # Japanese term column
-                        covered_terms.update(extract_terms(str(row)))
-            elif block["type"] == "concept_card":
-                covered_terms.update(block.get("keywords", []))
-                covered_terms.update(extract_terms(block.get("content", "")))
-                covered_terms.update(extract_terms(block.get("translation", "")))
-                covered_terms.update(extract_terms(block.get("title", "")))
+    covered_terms = covered_terms_from(content)
 
-    # Check each page
     total_pages = 0
     uncovered_pages = []
-    page_terms = {}  # page -> top unmatched terms
 
     for doc in parsed:
         for page in doc.get("pages", []):
             total_pages += 1
             page_text = page.get("text", "")
             if not page_text.strip():
-                # Empty page (image-only or blank), skip
-                continue
+                continue  # image-only / blank page
 
-            page_terms_set = extract_terms(page_text)
-            matched = page_terms_set & covered_terms
-            unmatched = page_terms_set - covered_terms
-
+            page_terms = extract_terms(page_text)
+            matched = page_terms & covered_terms
             if not matched:
-                # Filter out obvious non-technical unmatched terms
                 noise = {"の", "こと", "する", "いる", "ある", "なる", "これ", "それ", "ため",
                          "よう", "など", "ます", "です", "から", "まで", "より", "The",
                          "This", "For", "Are", "Not", "All", "Its", "Can", "Has", "One"}
-                significant = {t for t in unmatched if t not in noise and len(t) > 2}
+                significant = {t for t in page_terms - covered_terms if t not in noise and len(t) > 2}
                 if significant:
                     uncovered_pages.append({
-                        "doc": doc["filename"],
-                        "page": page["page"],
-                        "sample_terms": list(significant)[:8]
+                        "doc": doc.get("filename", "?"),
+                        "page": page.get("page", "?"),
+                        "sample_terms": list(significant)[:8],
                     })
 
     covered_count = total_pages - len(uncovered_pages)
     rate = (covered_count / total_pages * 100) if total_pages else 0
 
-    # Report
     print(f"=== Coverage Report ===")
     print(f"Total pages: {total_pages}")
-    print(f"Pages with >=1 term covered: {covered_count} ({rate:.0f}%)")
+    print(f"Pages with >=1 covered term: {covered_count} ({rate:.0f}%)")
     print(f"Pages with 0 coverage: {len(uncovered_pages)}")
+    print(f"Covered term pool: {len(covered_terms)} terms")
     print()
 
     if uncovered_pages:
@@ -97,8 +111,8 @@ def main():
         for item in uncovered_pages:
             terms_str = ", ".join(item["sample_terms"][:5])
             print(f"  {item['doc']} p{item['page']}: {terms_str}")
+        print()
 
-    print()
     if rate >= 85:
         print("Verdict: GOOD — coverage is solid.")
     elif rate >= 70:
