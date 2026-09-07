@@ -33,5 +33,5 @@ npx @modelcontextprotocol/inspector
 
 ## C 线验证
 
-- [ ] 用 darwin-skill 给自己写的 SKILL.md 打分，记录初始分数
-- [ ] 根据评分报告改一版，再打分，记录涨幅
+- [x] 用 darwin-skill 给自己写的 SKILL.md 打分，记录初始分数
+- [x] 根据评分报告改一版，再打分，记录涨幅
