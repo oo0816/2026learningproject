@@ -8,6 +8,7 @@ Usage:
 
 Reads parsed text from output/parsed_ppt.json (run a parser first).
 Reports pages whose text matches none of the content's covered terms.
+The parsed path is anchored to the skill root, so this runs from any cwd.
 """
 import json
 import re
@@ -52,7 +53,9 @@ def covered_terms_from(content):
 
 
 def main():
-    parsed_path = Path("output/parsed_ppt.json")
+    # Anchor output/ to the skill root (this file lives in <skill-root>/scripts/),
+    # so the checker works regardless of the caller's working directory.
+    parsed_path = Path(__file__).resolve().parent.parent / "output" / "parsed_ppt.json"
     if len(sys.argv) < 2:
         print("usage: python scripts/check_coverage.py <content.json>")
         sys.exit(2)

@@ -119,6 +119,8 @@ short_description: 根据日语授课的CS课件和试卷自动生成复习文�
 
 三种来源都抽成**同一份考点库 JSON**，每条含 `来源`（如 2024 期末 / 同学回忆）、`题型 / 题号`、`考点术语`、`频次`、`重要度 ★`。**考点库是考点模式排文档的唯一主线**——哪些章靠前、哪些给 ★★、哪些配红字【試験】、末章附录写什么，全由它定，不许凭空加。
 
+**考点模式的覆盖口径（区别于复习模式的 ≥85%）**：达标 = 试卷/回忆命中的讲义页**全部覆盖**（逐条核对，每条红字都能在正文/附录找到对应），**未命中的讲义页不硬凑**——复习模式的 ≥85% 只适用于"讲义全扫"的复习模式，套到考点模式会误报 NEEDS WORK。收尾时在文末写**「覆盖范围声明」**：列出命中了哪些讲义页、哪些因回忆未涉及而跳过。
+
 ### 通路 A — 直写（单份 / 小课件 / 想自由排版时默认）
 
 1. 在 `scripts/` 现写 `build_review.py`：
@@ -138,7 +140,7 @@ short_description: 根据日语授课的CS课件和试卷自动生成复习文�
 ### 通路 B — JSON（大课件 / 批量 / 需覆盖率迭代）
 
 1. 写内容 JSON（规范与示例见下、字段见 [path_b_render.py](scripts/path_b_render.py) 头注释）。
-2. 覆盖核查：`python scripts/check_coverage.py <content.json>`（目标 ≥85%）；报 0% 或不达标 → 查「失败模式与兜底」表。
+2. 覆盖核查：`python scripts/check_coverage.py <content.json>`（复习模式目标 ≥85%；脚本自动定位 skill 根目录，任意目录可跑）。**口径 = 页文本与内容术语池 ≥1 词命中即算覆盖（宽松：封面/近空页命中会推高数字——重点看列出的 NO coverage 页）**。报 0% 或不达标 → 查「失败模式与兜底」表。
 3. 渲染：`python scripts/path_b_render.py <content.json> -o output/review.pdf`。
 4. **🔴 目验** 与样张同味，不符先回改，不交付。参照 `output/sample_b.pdf`。
 
@@ -173,7 +175,7 @@ short_description: 根据日语授课的CS课件和试卷自动生成复习文�
 1. 版式：只用上表元件，无自创排版；红色只出现在考点和图注。
 2. 双语：术语准确、说明可懂、标题中日；表格説明列中日双语。
 3. 考点：★ 和红字有依据（试卷真实考点或讲义明确要点），不编造。
-4. 覆盖：逐页对照，无整页遗漏，内容覆盖 ≥85%（B 用 check_coverage.py）。
+4. 覆盖：**复习模式**＝逐页对照、无整页遗漏、≥85%（B 用 check_coverage.py）；**考点模式不套 85%**＝命中的讲义页全覆盖、未命中页不硬凑，文末写覆盖范围声明。
 5. 图：只放重点图，图注点出"考什么"。
 6. 全程只读真实来源（课件/试卷），不虚构术语与事实。
 
@@ -200,5 +202,5 @@ short_description: 根据日语授课的CS课件和试卷自动生成复习文�
 ## 注意事项
 
 - **字体/缺字形**：引擎加载 `fonts/simsun_extracted.ttf`（回退 `fonts/simsun.ttc`）；缺字形警告＝内容用了 SimSun 没有的字 → 按「失败模式与兜底」表改写，不引入第二字体。Noto 等旧字体已不参与渲染。
-- **脚本位置**：均在 `scripts/`，图片在 `output/images/`；解析脚本会覆盖 `output/parsed_*.json`。
+- **脚本位置与运行目录**：均在 `scripts/`，图片在 `output/images/`；解析脚本会覆盖 `output/parsed_*.json`。脚本里的 `output/` 是相对 skill 根目录的路径——**请在 skill 根目录运行**（如 `python scripts/parse_ppt.py`）；`check_coverage.py` 例外，已自动定位 skill 根目录，任意目录可跑。
 - **旧引擎已删除**：`scripts/generate_pdf.py`（reportlab 数据驱动）已退役并从仓库移除，新产出一律走 guide_style（A 直写）或 path_b_render（B JSON）。
