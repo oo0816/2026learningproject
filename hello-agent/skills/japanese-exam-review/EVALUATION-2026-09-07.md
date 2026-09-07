@@ -36,3 +36,25 @@
 ## 建议下一步
 
 把真实课件 + 至少一份真实试卷（任何形式）投进 `exams/` → 实装考点库 → 生成"真考点红字 + 用語索引 / 試験対策"完整样张 → darwin 重打分。
+
+---
+
+# 附：darwin-skill 2.0 优化运行记录（同日追加）
+
+2026-09-07 对重建版跑 darwin-skill 2.0 全流程（基线 → 4 轮优化 → 实测 ratchet）。完整日志见 `D:\claudecode\.claude\skills\darwin-skill\results.tsv`（5 行：baseline + R1~R4 全 keep）。
+
+| 阶段 | 分数 | 说明 |
+|------|------|------|
+| 基线 (efb9385) | 75.7 | 5/5 full_test 子 agent（with-skill vs baseline）；最弱 dim3=5、dim2/dim6=7（覆盖率工具对旧 schema 报 0%）、README 红灯 3 |
+| R1 (295fdfe) | gate | README runtime-neutral（badge/安装/使用措辞去单运行时），红灯 3→0 |
+| R2 (bb2aacd) | +4.2 | 9 行 if→then 失败兜底表 + 🔴/🛑 显性标记（dim3 5→8、dim4 7→8） |
+| R3 (5ba3c10) | +1.6 | 通路 A/B 规模阈值量化为 ≤12 页/整份多章 + `check_coverage.py` 重写对齐现行 schema（重测实证 22/22=100% GOOD） |
+| R4 (2703108) | +1.2 | 考点模式覆盖口径（不套 ≥85%、文末 A3 覆盖范围声明）+ check_coverage 路径自动定位（任意目录可跑，实测 86% GOOD） |
+| **终值** | **82.7** | Δ **+7.0** |
+
+**实测证据（3 个独立 with-skill 子 agent）**
+- p1-r2（通路 B 复习模式）：13 页 PDF，覆盖率 22/22=100%——R3 修的工具 0% 故障确证恢复；兜底表实战生效 2 次。
+- p2-r2（考点模式·回忆 3 大問）：8 页 PDF，红字/★ 严格只取自 3 条回忆题、零编造年号 → 暴露缺口 1「考点模式覆盖率达标线未量化」。
+- p2-r4（R4 验证，重跑同场景）：10 页 PDF，A3 覆盖范围声明列明 6 命中/16 跳过页（6+16=22）、未硬凑 ≥85%；Poison 讲义笔误标注"誤記のお知らせ"；→ R4 修复生效。本地留存 `output/sample_考点模式_回忆版.pdf` 供目验。
+
+**darwin 遗留（诚实留痕）**：dim8 实测中"无视觉"（PNG 读不了图）限制了逐页像素目验，子 agent 用文本层+引擎不变式替代——真实用户的视觉目验（翻 sample_a/b）仍是必要环节。考点库 schema（parse_exam）依旧等真实试卷投入 exams/ 后实装闭环。
