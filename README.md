@@ -32,8 +32,7 @@ hello-agent/
 │   ├── l4-skills-mcp/          （l4-skills-vs-tools.md 对比表 + 优化日志）
 │   └── l5-multi-agent/ · l6-final-agent/   （脚手架占位，待做）
 ├── skills/
-│   ├── japanese-exam-review/   ← ★ 主打 skill：日语 CS 复习 PDF 生成器
-│   └── my-first-skill/         （入门练习 skill）
+│   └── japanese-exam-review/   ← ★ 第一个完整 skill（L4 交付物）：日语 CS 复习 PDF 生成器
 ├── agent-notes.md              ← 学习日记
 ├── HELLOAGENT.md               ← Agent Learning Hub（外部参考整理）
 └── scripts/progress.py         ← 进度仪表盘

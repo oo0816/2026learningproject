@@ -4,12 +4,12 @@ L4 · Skills + MCP 实战
 
 ## 你这关要搞懂两件事
 
-### 1. 写一个高质量的 SKILL.md
-位置：skills/my-first-skill/SKILL.md
-要求：触发条件 + 步骤 + 脚本 + 模板 + smoke test
-用 darwin-skill 跑 2 轮优化，记录分数变化
+### 1. 写一个高质量的 SKILL.md ✅ 已完成
+成品位置：skills/japanese-exam-review/SKILL.md（自选主题：日语 CS 复习 PDF 生成器）
+要求已满足：触发条件 + 双通路步骤 + 脚本 + 模板 + smoke_test
+已用 darwin-skill 跑 4 轮优化，75.7 → 82.7（记录见 l4-skill-optimization-log.md）
 
-### 2. 接一个 MCP Server
+### 2. 接一个 MCP Server ⬜ 待做
 MCP = Model Context Protocol。本质是一个标准化协议，让 agent 能连接外部数据源。
 
 传统方式：每个数据源写一个专用工具 → 工具越来越多 → 难维护
@@ -190,19 +190,18 @@ if __name__ == "__main__":
     print("=" * 55)
     print()
     print("两件事要完成：")
-    print("  1. 写完 skills/my-first-skill/SKILL.md")
-    print("     - 配套脚本: skills/my-first-skill/run_review.py")
-    print("     - 输出模板: skills/my-first-skill/template_output.md")
-    print("     - 用 darwin-skill 评分 + 迭代优化")
+    print("  1. 写完一个完整 SKILL.md  ✅ 已完成")
+    print("     成品 = skills/japanese-exam-review/SKILL.md")
+    print("     （含脚本 + 模板 + smoke_test，darwin 75.7→82.7）")
     print()
-    print("  2. 接一个 MCP server")
+    print("  2. 接一个 MCP server  ⬜ 下一步待做")
     print("     - 推荐: filesystem 或 sqlite")
-    print("     - 写出 SimpleMCPClient（理解协议原理）")
-    print("     - 把 MCP 工具桥接到你的 L2 agent")
+    print("     - 实机接一个真实 MCP server（非手写 demo），在本目录跑通")
+    print("     - 可选：把 MCP 工具桥接到你的 L2 agent")
     print()
     print("  3. 写笔记:")
-    print("     - notes/l4-skills-vs-tools.md（对比表）")
-    print("     - notes/l4-skill-optimization-log.md（优化记录）")
+    print("     - projects/l4-skills-mcp/l4-skills-vs-tools.md（对比表）")
+    print("     - projects/l4-skills-mcp/l4-skill-optimization-log.md（优化记录）")
     print()
     explore_mcp_server()
 

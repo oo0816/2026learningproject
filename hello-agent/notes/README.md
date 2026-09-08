@@ -143,10 +143,10 @@ L6  交付真实项目       █████████████████
 - [ ] 用 darwin-skill 跑 2 轮优化，记录分数变化
 
 ### 产出物
-- [ ] `skills/my-first-skill/SKILL.md` — 自选主题（如 code-review / release-note / api-doc-gen）
-- [ ] `skills/my-first-skill/` 下至少有 1 个脚本 + 1 个模板
-- [ ] `notes/l4-skills-vs-tools.md` — Skill vs Tool vs MCP vs A2A 的对比表
-- [ ] `notes/l4-skill-optimization-log.md` — darwin-skill 优化记录，含每一轮的分数和改动
+- [x] `skills/japanese-exam-review/SKILL.md` — 第一个完整 skill（自选主题：日语 CS 复习 PDF 生成器），含触发条件/双通路/脚本/模板/smoke test
+- [x] `skills/japanese-exam-review/` 下含脚本 + 模板 + smoke_test + test-prompts
+- [x] `projects/l4-skills-mcp/l4-skills-vs-tools.md` — Skill vs Tool vs MCP vs A2A 的对比表（原产出位置，笔记路径见 notes/l4-skill-mcp-qna.md）
+- [x] `projects/l4-skills-mcp/l4-skill-optimization-log.md` — darwin-skill 优化记录（75.7→82.7，4 轮全 keep）
 
 ### B线验证
 - [ ] 一个 SKILL.md 被 agent 加载后，agent 的 system prompt 里多了什么？
