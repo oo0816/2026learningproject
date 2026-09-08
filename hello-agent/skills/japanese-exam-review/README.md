@@ -30,6 +30,7 @@
 japanese-exam-review/
 ├── SKILL.md                    ← Skill 定义：触发/统一版式/写作规范/两通路/JSON schema
 ├── README.md
+├── test-prompts.json           ← 3 个 agent 端到端场景（复习/考点回忆版/无材料防幻觉）
 ├── scripts/
 │   ├── parse_pdf_lecture.py    ← PDF 讲义 → output/parsed_ppt.json + images
 │   ├── parse_ppt.py            ← PPTX 课件 → 同上
@@ -37,7 +38,8 @@ japanese-exam-review/
 │   ├── guide_style.py          ← ★ 排版引擎（统一版式唯一来源）
 │   ├── path_b_render.py        ← 通路B：内容 JSON → PDF（复用引擎）
 │   ├── build_sample_a.py       ← 通路A 示例（直写）
-│   └── check_coverage.py       ← 覆盖率检查（parsed vs content JSON）
+│   ├── check_coverage.py       ← 覆盖率检查（parsed vs content JSON）
+│   └── smoke_test.py           ← ★ 快速冒烟：一条命令回归依赖/字体/schema/覆盖率/A+B渲染
 ├── examples/
 │   ├── content_b_example.json  ← 通路B 完整示例输入
 │   └── README.md
@@ -73,6 +75,23 @@ mkdir ppt exams
 ```
 
 Skill 确认范围与通路 → 解析课件 →（可选）解析试卷/建考点清单 → 通路 A 直写或通路 B JSON →（B）覆盖率核查 → 目验 PDF。
+
+## 冒烟测试（改了脚本/依赖/字体后必跑）
+
+两种验证，别混：
+
+| | 命令 | 验证什么 | 成本 |
+|---|---|---|---|
+| **快速冒烟**（推荐每次改完跑） | `python scripts/smoke_test.py` | skill 的确定性部件：依赖/字体/脚本语法/解析产物/内容 JSON schema/覆盖率/通路 A+B 渲染出 PDF | 秒级、零 token |
+| agent 端到端 | 用 `test-prompts.json` 的 3 场景请真子 agent 带 SKILL 跑 | 复习 / 考点回忆版 / 无材料防幻觉的完整行为 | 烧 token（darwin full_test 这类） |
+
+```
+python scripts/smoke_test.py                          # 回归默认示例，覆盖率下限 85%
+python scripts/smoke_test.py <你的content.json>        # 换成新做的真实内容做回归
+python scripts/smoke_test.py --cov-min 90             # 收紧覆盖率下限
+```
+
+冒烟**只**验确定性部件；图的取舍、考点库、是否编造等质量项仍要靠端到端与目验。
 
 ## 内容块（就这 5 种，B JSON 与 A 方法一一对应）
 

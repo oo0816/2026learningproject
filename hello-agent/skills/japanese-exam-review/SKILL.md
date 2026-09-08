@@ -181,6 +181,17 @@ short_description: 根据日语授课的CS课件和试卷自动生成复习文�
 
 ---
 
+## 冒烟测试（快速回归）
+
+改过脚本/依赖/字体后、或交付给同学前，先跑一遍免费秒级的冒烟，确认 skill 的确定性部件都活着：
+
+```bash
+python scripts/smoke_test.py                          # 默认回归 examples/content_b_example.json，覆盖率下限 85%
+python scripts/smoke_test.py <content.json>           # 换成本次产出做回归
+```
+
+它检查：依赖可导入 → 字体在位 → scripts 语法 → 解析产物 → 内容 JSON schema → 覆盖率（check_coverage 同口径）→ 通路 A 与通路 B 都真渲染出 PDF。**冒烟只验确定性部件**——agent 端到端 3 场景（复习/考点回忆版/无材料防幻觉）在 `test-prompts.json`，需真子 agent 跑，不在此列。
+
 ## 失败模式与兜底（先想失败再动手）
 
 遇到下表症状按行处理，**不许硬闯、不许静默跳过**：
