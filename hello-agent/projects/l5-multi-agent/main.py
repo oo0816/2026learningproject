@@ -57,6 +57,7 @@ Agent A ←→ Agent B  各自有专长，互相提问
 """
 
 import os
+import re
 import sys
 import json
 import time
@@ -167,7 +168,7 @@ def create_client():
     # global：函数里给变量赋值时，Python 默认当它是局部变量。
     # 不写这行，下面的 `_client_singleton = ...` 只会创建个局部变量，
     # 模块级那个永远是 None，缓存彻底失效（而且上面 if 还会报 UnboundLocalError）。
-    global _client_singleton
+    global _client_singleton#单例的意思
 
     # ── 单例的「命中缓存」分支 ──
     if _client_singleton is not None:
@@ -861,9 +862,21 @@ class Reviewer(BaseAgent):
         "你的任务：按 3 条标准审核：\n"
         "1. 是否覆盖了用户需求的核心点；\n"
         "2. 结构是否清晰（摘要/分节/结论）；\n"
-        "3. 是否有明显事实错误、空话或自相矛盾。\n"
+        "3. 是否有明显事实错误、空话或自相矛盾；\n"
+        "4. 字数是否符合用户要求（用户提了字数就必须逐字核对）。\n"
         "输出格式（严格只输出这一行 JSON，不要任何其它文字）：\n"
-        '{"verdict": "pass" 或 "revise", "score": 0到10的整数, "comments": "给 Writer 的具体修改意见"}'
+        '{"verdict": "pass" 或 "revise", "score": 0到10的整数, '
+        '"issue_type": "最主要问题的类别", "comments": "给 Writer 的具体修改意见"}\n'
+        "issue_type 只能从下面 7 个词里选一个，必须原样照抄，不要翻译、不要加注解：\n"
+        "  length    字数/篇幅不符合要求\n"
+        "  accuracy  事实错误、无依据的断言、与检索结果不符\n"
+        "  structure 结构混乱、缺分节或结论、段落冗余重复\n"
+        "  coverage  漏掉了用户要求的要点\n"
+        "  style     语言表达、措辞、可读性\n"
+        "  other     以上都不是\n"
+        "  none      verdict 为 pass 时填这个\n"
+        "verdict 为 revise 时，issue_type 必须指出**最主要**的那一个问题——\n"
+        "只填一个，别罗列。comments 里再详细展开。"
     )
 
     def __init__(self, **kw):
@@ -894,6 +907,84 @@ class Reviewer(BaseAgent):
 #
 # 失败时给一个"必 revise"的保守结果——宁可多改一轮，
 # 也不要把没审过的报告放行。
+
+# ── Reviewer 的"问题类别"枚举 ──
+#
+# 为什么要给问题分类，而不是让 Reviewer 自由描述？
+#
+# 因为 Supervisor 要靠这个值做**确定性判断**（见 run() 里的护栏 3：
+# 连续两轮卡在同一个类别 → 强制放行）。
+#
+# 一开始我是拿意见**原文**做比较的（`comment == last_comments`），
+# 结果实测完全失效——真实 Reviewer 每轮都换一种说法讲同一件事：
+#     第1轮 "字数严重超标：草稿约600字…需压缩近一半"
+#     第2轮 "字数超标：全文约500字…需压缩至300字上下"
+#     第3轮 "字数约450字，明显超出300字要求"
+# 我还试过 Jaccard / Dice / Overlap 三种相似度度量，同组（确实是同一
+# 问题）和异组（确实不同问题）的分数几乎重叠，没有一个能可靠区分。
+#
+# 结论：**别猜自由文本像不像，直接让模型填枚举。**
+# 比较两个枚举值是确定性操作，不依赖任何模糊匹配。
+ISSUE_TYPES = frozenset({
+    "length",      # 字数/篇幅不符合要求
+    "accuracy",    # 事实错误、无依据的断言、与检索结果不符
+    "structure",   # 结构混乱、缺分节或结论、段落冗余重复
+    "coverage",    # 漏掉了用户要求的要点
+    "style",       # 语言表达、措辞、可读性
+    "other",       # 以上都不是
+    "none",        # verdict=pass 时填这个
+})
+
+
+def _normalize_issue_type(obj: dict) -> str:
+    """把模型给的 issue_type 收进枚举；收不进去的一律当 "unknown"。
+
+    这里要宽容一点：模型经常不老实照抄枚举，而是写成
+    "length（字数超标）" 或者 "Length" 这类带注解/带大小写的变体。
+    直接判非法太浪费——抓出开头的那个词再比一次就够了。
+
+    "unknown" 是**不参与比较**的哨兵值：护栏 3 只认得出具体类别的重复。
+    这样即使模型完全乱填，最坏结果也只是"少触发一次护栏"（多烧一轮），
+    而不是"把不同问题误判成同一个"（错误放行）。
+    """
+    raw = str(obj.get("issue_type") or "").strip().lower()
+    if raw in ISSUE_TYPES:
+        return raw
+    # 切掉括号注解："length（字数超标）" → "length"
+    head = re.split(r"[（(\[【:：]", raw, maxsplit=1)[0].strip()
+    return head if head in ISSUE_TYPES else "unknown"
+
+
+# ── 从用户需求里挖出「字数要求」──
+#
+# 为什么要单独做这一步？
+#
+# 实测暴露的问题：用户说"写一份 300 字左右的报告"，Researcher 交回
+# 1099 字的研究摘要，Writer 照着写出 1015 字的报告，Reviewer 连着三轮
+# 喊"字数超标"，Writer 连着改了三轮，最后交出来 710 字——**还是超标**。
+#
+# 根因不是模型不听话，是**约束没被传递到位**：字数要求只是用户原话里的
+# 一句，淹没在一长串 prompt 里，Writer 没把它当硬指标。
+#
+# 所以这里把它抠出来单独存着，每次给 Writer 的 prompt 里显式重述一遍。
+# 同一个信息，出现的位置和措辞，决定了模型会不会真当回事。
+_LENGTH_RE = re.compile(r"(\d{2,5})\s*字")
+
+
+def _extract_length_limit(text: str):
+    """从用户需求里挖出字数要求：「写一份 300 字左右的报告」→ 300。
+
+    挖不到就返回 None——不是所有请求都规定了字数，不能硬套。
+    """
+    m = _LENGTH_RE.search(text)
+    if not m:
+        return None
+    n = int(m.group(1))
+    # 区间兜底：太小（"3字"）或太大（"99999字"）多半是误匹配，
+    # 当成真要求反而会误导 Writer，不如当作"没提字数"。
+    return n if 50 <= n <= 5000 else None
+
+
 def _parse_verdict(text: str) -> dict:
     try:
         start, end = text.index("{"), text.rindex("}")
@@ -902,6 +993,9 @@ def _parse_verdict(text: str) -> dict:
         # 光能解析还不够，还得检查内容是否合法。
         # 模型可能返回 {"verdict": "还行吧"} 这种解析得动但没用的东西。
         if obj.get("verdict") in ("pass", "revise"):
+            # issue_type 统一在这里归一化——下游（护栏 3）就不用再操心
+            # 模型填的到底是 "length" 还是 "Length（字数超标）" 了。
+            obj["issue_type"] = _normalize_issue_type(obj)
             return obj
         raise ValueError("verdict 字段非法")   # 主动抛，让下面统一处理
     except Exception:
@@ -915,7 +1009,10 @@ def _parse_verdict(text: str) -> dict:
         #
         # 这个思路值得记住：当"判断失败"时，默认值应该偏向安全的一侧。
         # 下面 _default_ask_human 的"读不到输入就默认拒绝"是同一个道理。
-        return {"verdict": "revise", "score": 0,
+        # issue_type 填 "unknown" 而不是某个具体类别：解析都失败了，
+        # 我们并不知道问题是什么。填具体值会让护栏 3 误判成
+        # "连续两轮同一个问题"从而错误放行——见 _normalize_issue_type 的说明。
+        return {"verdict": "revise", "score": 0, "issue_type": "unknown",
                 "comments": f"（评审输出无法解析，需按文本要求重写。原文：{text[:100]}）"}
 
 
@@ -1074,6 +1171,32 @@ class Supervisor:
         def _deadline():
             return time.time() - start_time > self.total_timeout
 
+        # ── 把用户的字数要求抠出来，变成一条反复强调的硬约束 ──
+        #
+        # 为什么在提示词里写两遍（Writer 初稿一次、每次改写再一次）？
+        # 因为改写那一轮的 prompt 特别长：研究摘要 + 上一版报告 + 评审意见
+        # 三块糊在一起，字数要求放最后容易被"淹没"。每轮重申是刻意的。
+        limit = _extract_length_limit(clean)
+        limit_rule = ""
+        shrink_hint = ""
+        if limit:
+            # 略超一点是允许的——要求"300字左右"却卡死 300 字，
+            # 等于把报告结构（摘要/分节/结论）的固定开销也算进去，
+            # 那样根本写不出完整结构。给 1.5 倍余量。
+            limit_rule = (
+                f"【硬性要求·最高优先级】全文总字数控制在 {limit} 字左右，"
+                f"不得超过 {int(limit * 1.5)} 字。\n"
+                f"这条优先级高于下面任何「写得详细 / 写充分」的暗示：\n"
+                f"如果研究摘要素材太多，**只挑最重要的 3 点写**，其余果断舍弃。\n"
+                f"宁可少讲，不能超字数。\n\n"
+            )
+            shrink_hint = (
+                "\n\n注意：本次改写要**做减法**——在上一版基础上删减、合并、压缩，"
+                "不要推倒重写，更不要扩写。改完必须比上一版更短。"
+            )
+            self.tracer.log("Supervisor", "write/limit",
+                            f"从需求中识别到字数上限 {limit} 字（硬约束已注入）")
+
         # ── 1. Research 阶段 ──
         #
         # 三个阶段的结构完全一样，都是"记一笔 → 调 agent → 检查结果"。
@@ -1114,7 +1237,9 @@ class Supervisor:
         self.tracer.log("Supervisor", "write/start", "把研究摘要交给 Writer")
         report = self.writer.think(
             clean,                                  # 原始需求
-            context=f"【研究摘要】\n{research}")     # 上游产物
+            # limit_rule 放在最前面——它是"最高优先级"，位置也要配得上。
+            # 用户没提字数时 limit_rule 是空串，等价于原来的行为。
+            context=f"{limit_rule}【研究摘要】\n{research}")     # 上游产物
         if report.startswith("[模型调用出错]") or report.startswith("[超步]"):
             return self._finish(start_time, f"❌ Writer 失败：{report}",
                                 status="agent_error")
@@ -1127,13 +1252,13 @@ class Supervisor:
         #
         # ── 先看这个循环的形状：它是个状态机 ──
         #
-        # `while True` + 内部 break，共有 **4 种出口**，每种给 reason
+        # `while True` + 内部 break，共有 **5 种出口**，每种给 reason
         # 赋一个不同的值，下游靠这个值判断发生了什么：
         #
         #   reason="passed"                → 评审通过（唯一的好结局）
         #   reason="max_loops_force_pass"  → 改太多次了，认输放行
         #   reason="timeout"               → 总超时，带着草稿退出
-        #   reason="oscillation_force_pass"→ 评审在原地绕圈，强行放行
+        #   reason="stuck_force_pass"      → 同一个问题改不掉，放弃治疗
         #
         # 后三种都是"强制放行"，但要区分开——因为它们对最终报告的
         # 可信度影响不同，status 里会如实体现出来。
@@ -1162,7 +1287,9 @@ class Supervisor:
         round_no = 0                  # 第几次评审（trace 用，含通过的那次）
         reason = "passed"             # 循环正常结束时 = 评审通过
         verdict = None
-        last_comments = None          # 上一轮"要求修改"的意见，用于检测反复横跳
+        # 上一轮问题的**类别**（枚举值，不是意见原文），用于检测"卡住"。
+        # 为什么不是存原文？见护栏 3 的注释——比原文不可靠，实测过。
+        last_issue = None
 
         while True:
             # ── 护栏 1：已经让 Writer 改满 max_review_loops 次 → 不再审，强制通过 ──
@@ -1205,25 +1332,47 @@ class Supervisor:
                 reason = "passed"
                 break
 
-            # ── 护栏 3：评审意见和上一轮一模一样 → 模型在自说自话，强制放行 ──
+            # ── 护栏 3：同一个问题改了两轮还是它 → 卡住了，强制放行 ──
             #
-            # 这一条最有意思，防的是一种很隐蔽的失败模式：
-            # Writer 认认真真改了一版，Reviewer 却给出**字面上完全相同**的
-            # 修改意见——说明它根本没看新版本，只是在重复自己的话。
-            # 这时候再循环下去纯属浪费，不如放行。
+            # 这一条防的失败模式：Reviewer 每轮都指同一个问题，Writer 也
+            # 确实改了，但改完问题依旧。继续循环只是烧钱，不会变好。
             #
-            # .strip() 是为了忽略首尾空白差异（"意见 " 和 "意见" 算同一句）。
-            # last_comments 初始是 None，所以第一轮不会触发
-            # （`if last_comments` 对 None 为假）——第一轮没有"上一轮"可比。
+            # ── 为什么拿 issue_type 比，而不是拿意见原文比？──
+            #
+            # 最初的实现是 `comment == last_comments`（全等比较），**实测失效**：
+            # 真实 Reviewer 每轮都换个说法讲同一件事——
+            #     第1轮 "字数严重超标：草稿约600字…需压缩近一半"
+            #     第2轮 "字数超标：全文约500字…需压缩至300字上下"
+            #     第3轮 "字数约450字，明显超出300字要求"
+            # 语义完全一致，字符串却几乎不重合。我实测了 Jaccard / Dice /
+            # Overlap 三种相似度度量，同组和异组的分数区间是重叠的，
+            # 没有哪个阈值能可靠区分。
+            #
+            # 所以改成**让 Reviewer 自己把问题归进固定枚举**（见 Reviewer.ROLE
+            # 的 issue_type 字段），这里只比较两个枚举值——确定性操作，
+            # 零模糊匹配。这比"猜两段文本像不像"可靠得多。
+            #
+            # ── 规则为什么是"连续两轮"？──
+            #
+            # 只看一轮会误伤：同一个问题完全可能一次就改好（第1轮提了，
+            # 第2轮就不该停）。连续两轮同类才说明"提了、改了、还在"。
+            #
+            # 第一轮不会触发（last_issue 是 None，和任何字符串都不等）——
+            # 第一轮本来也没有"上一轮"可比。
+            #
+            # "none"/"unknown" 被排除在外：前者是 pass 的标记，
+            # 后者是模型没填对时的兜底，都不代表一个真实的重复问题。
             comment = verdict.get("comments", "")
-            if last_comments and comment.strip() == last_comments.strip():
-                reason = "oscillation_force_pass"
-                self.tracer.log("Supervisor", "review/oscillation",
-                                "评审意见与上一轮完全相同，判定反复横跳，强制放行")
+            issue = verdict.get("issue_type", "unknown")
+            if issue not in ("none", "unknown") and issue == last_issue:
+                reason = "stuck_force_pass"
+                self.tracer.log("Supervisor", "review/stuck",
+                                f"连续两轮卡在同一个问题（{issue}），"
+                                f"改不动了，强制放行")
                 break
 
-            # 记住这一轮的意见，供下一轮比对
-            last_comments = comment
+            # 记住这一轮的问题类别，供下一轮比对
+            last_issue = issue
 
             # ── 走到这里说明：没通过，且还有修改额度 → 让 Writer 改一版 ──
             review_loops += 1
@@ -1238,10 +1387,14 @@ class Supervisor:
                 #   评审意见   → 明确要改什么
                 # 少给任何一块，Writer 都可能改出新问题（比如把
                 # 研究摘要里的事实改没了）。
-                context=f"【研究摘要】\n{research}\n\n"
+                # limit_rule 每轮重申（理由见上面提取 limit 时的注释）；
+                # shrink_hint 只在用户规定了字数时才非空——它提醒 Writer
+                # 这轮是"做减法"，别再越改越长（实测中真的会越改越长）。
+                context=f"{limit_rule}"
+                        f"【研究摘要】\n{research}\n\n"
                         f"【上一版报告】\n{report}\n\n"
-                        f"【评审要求修改】\n{comment}\n\n请按评审意见重写报告，"
-                        f"逐条回应每一条意见。")
+                        f"【评审要求修改】\n{comment}\n\n请按评审意见修改报告，"
+                        f"逐条回应每一条意见。{shrink_hint}")
             self.tracer.log("Writer", "revise/done",
                             f"改写完成 {len(report)} 字", report[:120])
             # 循环回到顶部 —— 但注意 report 已经被换成新版了，
@@ -1283,9 +1436,13 @@ class Supervisor:
             #   ① 评审结局   ok / ok(max_loops_force_pass) / ...
             #   ② 是否已交付 有无 (draft) 后缀
             #
-            # 用户批准了：  status = "ok"               或 "ok(oscillation_force_pass)"
-            # 用户没批准：  status = "ok(draft)"        或 "ok(oscillation_force_pass)(draft)"
+            # 用户批准了：  status = "ok"               或 "ok(stuck_force_pass)"
+            # 用户没批准：  status = "ok(draft)"        或 "ok(stuck_force_pass)(draft)"
             #                                         ↑ 加了 draft 后缀，表示只是草稿
+            #
+            # 括号里会是 4 种之一：max_loops_force_pass / timeout /
+            # stuck_force_pass（还有 passed，但那种情况括号根本不出现）。
+            # 下游 / 评测脚本可以按这个字符串分流。
             #
             # `if reason == "passed" else ...` 这个三元表达式是在说：
             # 一切正常就写干净的 "ok"；走了强制放行的路径就把原因
@@ -1477,8 +1634,10 @@ if __name__ == "__main__":
 #   → 多 Agent 增加延迟和成本。如果一个 agent 就能干好的活，不要拆。
 #
 # 坑 2：Reviewer 永远不满意 → 死循环
-#   → 多 agent 系统最经典的问题。解决方案：max_review_loops
-#     + 每次记录修改了什么 + 检测"反复横跳"（意见与上轮相同→强制放行）。
+#   → 多 agent 系统最经典的问题。本实现叠了三道护栏：max_review_loops、
+#     总超时、卡住检测（连续两轮同一类问题→强制放行）。
+#   → 检测"卡住"要比较 issue_type 枚举，**不能比较意见原文**——
+#     真实 Reviewer 每轮都会换个说法讲同一件事，实测文本相似度区分不了。
 #
 # 坑 3：Agent 之间传递的信息丢失
 #   → 用结构化格式交接。本实现里 Writer 的 context = 摘要 + 报告 + 意见，
