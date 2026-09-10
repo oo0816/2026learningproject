@@ -23,7 +23,7 @@
 ## 依赖
 
 ```bash
-pip install openai duckduckgo_search sentence-transformers
+pip install openai ddgs sentence-transformers
 ```
 
 如果 sentence-transformers 下载慢，可以先跳过——rag.py 的代码结构可以先写完，最后再装模型跑通。

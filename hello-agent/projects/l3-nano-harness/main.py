@@ -676,19 +676,24 @@ def get_weather(city: str) -> str:
 
 
 # 搜索库没装时优雅降级，不 import 失败
+# 优先用新包名 ddgs；旧名 duckduckgo_search 仍能跑但会打弃用警告
 _SEARCH_AVAILABLE = False
 try:
-    from duckduckgo_search import DDGS
+    from ddgs import DDGS
     _SEARCH_AVAILABLE = True
 except ImportError:
-    pass
+    try:
+        from duckduckgo_search import DDGS
+        _SEARCH_AVAILABLE = True
+    except ImportError:
+        pass
 
 
 def web_search(query: str, max_results: int = 3) -> str:
     """联网搜索（risk: safe）。结果截断，防止塞爆上下文。"""
     if not _SEARCH_AVAILABLE:
-        return ("搜索功能不可用：请先安装 duckduckgo_search\n"
-                "运行：pip install duckduckgo_search")
+        return ("搜索功能不可用：请先安装 ddgs\n"
+                "运行：pip install ddgs")
     try:
         with DDGS() as ddgs:
             results = list(ddgs.text(query, max_results=max_results))

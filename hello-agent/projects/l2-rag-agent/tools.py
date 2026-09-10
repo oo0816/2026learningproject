@@ -51,19 +51,24 @@ import time
 # 任务 1：实现 web_search 工具
 # ─────────────────────────────────────────────
 # 目标：让 agent 能搜互联网。选一个免费方案：
-#   A) pip install duckduckgo_search   （免费，无需 API key）
+#   A) pip install ddgs                （免费，无需 API key）
 #   B) 用 Tavily Search API           （免费额度 1000次/月，需要注册）
 #
 # 函数签名已经写好，你来实现内部逻辑。
 # 提示：搜索结果可能为空、可能超时、可能返回格式出乎意料——都要处理。
 
 # 尝试导入搜索库，没装则降级
+# 优先用新包名 ddgs；旧名 duckduckgo_search 仍能跑但会打弃用警告
 _SEARCH_AVAILABLE = False
 try:
-    from duckduckgo_search import DDGS
+    from ddgs import DDGS
     _SEARCH_AVAILABLE = True
 except ImportError:
-    pass
+    try:
+        from duckduckgo_search import DDGS
+        _SEARCH_AVAILABLE = True
+    except ImportError:
+        pass
 
 
 def web_search(query: str, max_results: int = 3) -> str:
@@ -78,8 +83,8 @@ def web_search(query: str, max_results: int = 3) -> str:
         格式化的搜索结果字符串，或错误信息
     """
     if not _SEARCH_AVAILABLE:
-        return ("搜索功能不可用：请先安装 duckduckgo_search\n"
-                "运行：pip install duckduckgo_search")
+        return ("搜索功能不可用：请先安装 ddgs\n"
+                "运行：pip install ddgs")
 
     try:
         with DDGS() as ddgs:
