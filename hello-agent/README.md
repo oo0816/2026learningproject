@@ -1,4 +1,4 @@
-p-o0[                                                                                                                                         [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[0000000000000000000000000000[# Agent Learning Hub
+# Agent Learning Hub
 
 A curated AI Agent learning roadmap for people who want to build useful, reliable agents instead of collecting random links.
 
@@ -60,11 +60,11 @@ Agent 领域变化很快。当前更值得投入的不是老式“角色扮演�
 
 ### Stage 2: Learn Tool Use, RAG, And Memory
 
-- [ ] 会做检索增强生成：chunk、embed、retrieve、answer with citations。
-- [ ] 会把搜索、数据库、文件、浏览器、代码执行接成工具。
-- [ ] 会区分短期上下文、会话记忆、长期记忆。
-- [ ] 会处理工具失败、空结果、重复调用、幻觉引用。
-- [ ] 会让 agent 在回答里给出来源或证据。
+- [x] 会做检索增强生成：chunk、embed、retrieve、answer with citations。
+- [x] 会把搜索、数据库、文件、浏览器、代码执行接成工具。
+- [x] 会区分短期上下文、会话记忆、长期记忆。
+- [x] 会处理工具失败、空结果、重复调用、幻觉引用。
+- [x] 会让 agent 在回答里给出来源或证据。
 
 推荐阅读：
 
@@ -104,11 +104,11 @@ Agent 领域变化很快。当前更值得投入的不是老式“角色扮演�
 | [CyberClaw](https://github.com/ttguy0707/CyberClaw) | Transparent agent architecture | 学全行为审计、两段式安全调用、双水位记忆和心跳任务。 |
 | [LangGraph](https://langchain-ai.github.io/langgraph/) | Stateful graph orchestration | 学状态图、可恢复执行和可控编排。 |
 
-- [ ] 读懂一个 agent harness 的目录结构。
-- [ ] 找出它的 agent loop、tool registry、permission gate、session store、context compaction。
-- [ ] 跑通它的最小示例，并加一个你自己的工具。
-- [ ] 观察一次完整 trace，解释每一步为什么发生。
-- [ ] 把同一个任务分别用「裸 agent loop」和「harness」实现，对比差异。
+- [x] 读懂一个 agent harness 的目录结构。
+- [x] 找出它的 agent loop、tool registry、permission gate、session store、context compaction。
+- [x] 跑通它的最小示例，并加一个你自己的工具。
+- [x] 观察一次完整 trace，解释每一步为什么发生。
+- [x] 把同一个任务分别用「裸 agent loop」和「harness」实现，对比差异。
 
 产出：一个可调试的 agent harness demo，包含 README、运行步骤、示例输入输出和失败记录。
 
@@ -134,14 +134,14 @@ Agent 领域变化很快。当前更值得投入的不是老式“角色扮演�
 
 现代 agent 的能力不只来自模型和工具，也来自可复用的 skills。一个好的 skill 像一份小型操作手册：告诉 agent 什么时候使用、怎么使用、需要哪些脚本/资源、如何验证结果。
 
-- [ ] 理解 Skill 和 Tool 的区别：tool 是可调用接口，skill 是可复用流程知识。
-- [ ] 理解 Skill 和 Prompt 的区别：prompt 通常是一次性指令，skill 是可发现、可版本化、可分发的能力包。
-- [ ] 理解 Skill 和 MCP 的区别：MCP 接入外部工具/数据源，skill 告诉 agent 如何完成一类任务。
+- [x] 理解 Skill 和 Tool 的区别：tool 是可调用接口，skill 是可复用流程知识。
+- [x] 理解 Skill 和 Prompt 的区别：prompt 通常是一次性指令，skill 是可发现、可版本化、可分发的能力包。
+- [x] 理解 Skill 和 MCP 的区别：MCP 接入外部工具/数据源，skill 告诉 agent 如何完成一类任务。
 - [ ] 阅读 Claude Code Skills 的文件结构和触发机制。
 - [ ] 阅读 OpenClaw Skills 的加载、作用域和安全边界。
-- [ ] 写一个最小 `SKILL.md`，包含 name、description、何时使用、步骤、验收标准。
-- [ ] 给 skill 加一个脚本或模板文件，并说明 agent 什么时候才需要加载它。
-- [ ] 给 skill 写一个 smoke test，验证它是否真的提升任务成功率。
+- [x] 写一个最小 `SKILL.md`，包含 name、description、何时使用、步骤、验收标准。
+- [x] 给 skill 加一个脚本或模板文件，并说明 agent 什么时候才需要加载它。
+- [x] 给 skill 写一个 smoke test，验证它是否真的提升任务成功率。
 
 推荐阅读：
 
