@@ -213,7 +213,7 @@ git push                      # 4. 上云（绿格子 + 防丢）
 - [ ] 提交信息用前缀规范，写清"为什么"
 - [ ] 不提交 `.pyc` / 环境文件 / 密钥
 - [ ] push 前 `git remote -v` 确认目标仓库
-- [ ] 每周日把进度更新到 progress.json 并 push（面试时绿格子和提交历史就是证据）
+- [ ] 每周日把进度更新到 `hello-agent/notes/README.md` 并 push（面试时绿格子和提交历史就是证据）
 
 ---
 

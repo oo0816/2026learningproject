@@ -114,11 +114,11 @@ Agent 领域变化很快。当前更值得投入的不是老式“角色扮演�
 
 ### Stage 4: Multi-Agent Is Coordination, Not Magic
 
-- [ ] 理解 planner / executor / reviewer / critic / router 等常见角色。
-- [ ] 学会用 supervisor 或 graph 管理多 agent，而不是让 agent 随便聊天。
-- [ ] 会定义每个 agent 的职责边界、输入输出 schema、停止条件。
-- [ ] 会处理循环、争论、任务漂移、上下文膨胀。
-- [ ] 会判断什么时候单 agent 更好。
+- [x] 理解 planner / executor / reviewer / critic / router 等常见角色（Researcher/Writer/Reviewer 已落地）。
+- [x] 学会用 supervisor 或 graph 管理多 agent，而不是让 agent 随便聊天。
+- [x] 会定义每个 agent 的职责边界、输入输出 schema、停止条件。
+- [ ] 会处理循环、争论、任务漂移、上下文膨胀（循环/超时/卡住已处理，其余待补）。
+- [x] 会判断什么时候单 agent 更好。
 
 推荐阅读：
 
@@ -137,8 +137,8 @@ Agent 领域变化很快。当前更值得投入的不是老式“角色扮演�
 - [x] 理解 Skill 和 Tool 的区别：tool 是可调用接口，skill 是可复用流程知识。
 - [x] 理解 Skill 和 Prompt 的区别：prompt 通常是一次性指令，skill 是可发现、可版本化、可分发的能力包。
 - [x] 理解 Skill 和 MCP 的区别：MCP 接入外部工具/数据源，skill 告诉 agent 如何完成一类任务。
-- [ ] 阅读 Claude Code Skills 的文件结构和触发机制。
-- [ ] 阅读 OpenClaw Skills 的加载、作用域和安全边界。
+- [x] 阅读 Claude Code Skills 的文件结构和触发机制。
+- [ ] 阅读 OpenClaw Skills 的加载、作用域和安全边界（未完成）。
 - [x] 写一个最小 `SKILL.md`，包含 name、description、何时使用、步骤、验收标准。
 - [x] 给 skill 加一个脚本或模板文件，并说明 agent 什么时候才需要加载它。
 - [x] 给 skill 写一个 smoke test，验证它是否真的提升任务成功率。

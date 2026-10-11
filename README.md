@@ -12,7 +12,7 @@
 
 | 路径 | 是什么 | 当前状态 |
 |---|---|---|
-| [`hello-agent/`](hello-agent/) | **Agent 学习核心**：L0→L6 路线图 + 产出物 + skill | 🔵 L4 进行中（见下） |
+| [`hello-agent/`](hello-agent/) | **Agent 学习核心**：L0→L6 路线图 + 产出物 + skill | 🔵 L4/L5 进行中（见下） |
 | [`learn-claude-code/`](learn-claude-code/) | 独立克隆的 [learn-claude-code](https://github.com/shareAI-lab/learn-claude-code) 课程仓库（s01–s17 从 0 复刻 Claude Code harness），L3/L4 精读用 | 📖 参考教材 |
 | [`求职目录/`](求职目录/00-README.md) | 求职规划全套：双线策略、学习路线、项目规划、资源、时间线（00–05） | 🎯 求职主文档 |
 | [`note/`](note/) | 散装速查与清单：Git 速查、pi 快捷指令、AI 实习岗位清单 | 📝 日常记录 |
@@ -25,17 +25,16 @@ hello-agent/
 │   ├── README.md               ← ★ L0→L6 学习路线图（打勾清单 + 进度）
 │   ├── l0-reading-summary.md   · l2-note.md（三层记忆/RAG）
 │   ├── l3-harness-anatomy.md   · l3-nano-harness-qna.md   （L3 五问必答）
-│   └── l4-skill-mcp-qna.md     ← L4 概念问答（Skill/Tool/MCP/A2A，今天新增）
+│   ├── l4-skill-mcp-qna.md     ← L4 概念问答（Skill/Tool/MCP/A2A，今天新增）
+│   └── agent-notes.md          ← 学习日记
 ├── projects/                   ← 每关一个可运行代码项目
 │   ├── l1-mini-agent/          · l2-rag-agent/
 │   ├── l3-nano-harness/        （tool registry + permission gate + session store + 上下文压缩）
 │   ├── l4-skills-mcp/          （l4-skills-vs-tools.md 对比表 + 优化日志）
-│   └── l5-multi-agent/ · l6-final-agent/   （脚手架占位，待做）
+│   └── l5-multi-agent/（进行中） · l6-final-agent/（脚手架）
 ├── skills/
 │   └── japanese-exam-review/   ← ★ 第一个完整 skill（L4 交付物）：日语 CS 复习 PDF 生成器
-├── agent-notes.md              ← 学习日记
-├── HELLOAGENT.md               ← Agent Learning Hub（外部参考整理）
-└── scripts/progress.py         ← 进度仪表盘
+└── README.md                   ← Agent Learning Hub（外部参考整理）
 ```
 
 > 说明：早年根目录的 `00-README.md`~`05-*.md` 六份求职规划文档，现全部在 [`求职目录/`](求职目录/)，根 README 只做导航，不再重复内容。
@@ -62,15 +61,16 @@ hello-agent/
 |---|---|---|---|
 | L0 | Agent 认知 | ✅ 完成 | `notes/l0-reading-summary.md` |
 | L1 | 最小 Agent Loop（第一个里程碑） | ✅ 完成 | `projects/l1-mini-agent/` |
-| L2 | 工具 + 记忆 + RAG | ✅ 完成 | `projects/l2-rag-agent/` + `notes/l2-note.md` |
+| L2 | 工具 + 记忆 + RAG | ✅ 完成（验收记录待补） | `projects/l2-rag-agent/` + `notes/l2-note.md` |
 | L3 | Harness 源码拆解（核心阶段） | ✅ 完成 | `projects/l3-nano-harness/` + `notes/l3-harness-anatomy.md` |
-| L4 | Skills + MCP + 能力打包 | 🔵 **进行中** | `skills/japanese-exam-review/` + L4 概念笔记（今日） |
-| L5 | 多 Agent + 评测 | ⬜ 未开始 | `projects/l5-multi-agent/` |
+| L4 | Skills + MCP + 能力打包 | 🔵 **进行中** | `skills/japanese-exam-review/` + L4 概念笔记 |
+| L5 | 多 Agent + 评测 | 🔵 **进行中** | `projects/l5-multi-agent/main.py` + `evals.md` 骨架 |
 | L6 | 交付真实项目（最终产出） | ⬜ 未开始 | `projects/l6-final-agent/` |
 
-**当前聚焦 L4**：skill 已重建并优化到 82.7，概念（Skill/Tool/MCP/A2A）已闭环；下一步是 **接一个 MCP server 跑通协议 + 把 japanese-exam-review 的考点库用真实试卷实装**。
+当前整体进度约 **71%**（按各阶段权重估算）。
 
-> 每日进度可在 hello-agent 下用 `python scripts/progress.py` 查看仪表盘。
+**当前聚焦 L4 收尾 + L5 评测**：Skill 已优化到 82.7，概念闭环；下一步是 **接一个真实 MCP server**，然后 **跑完 L5 的 15 项 eval 并补评测总结**。
+
 
 ---
 

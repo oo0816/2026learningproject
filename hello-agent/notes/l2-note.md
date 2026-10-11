@@ -65,6 +65,24 @@ user 问 → assistant 答/调工具 → tool 返回结果 → assistant 再答
 
 assistant 永远是说话的那一方，tool 只是替它跑腿。
 
+多工具并行调用示例：
+
+```text
+assistant:
+  tool_calls = [
+    { id: "call_1", name: "get_weather", arguments: {"city": "北京"} },
+    { id: "call_2", name: "get_weather", arguments: {"city": "深圳"} }
+  ]
+
+tool:
+  { tool_call_id: "call_1", content: "北京：5°C" }
+
+tool:
+  { tool_call_id: "call_2", content: "深圳：28°C" }
+```
+
+关键点：`tool` 结果不是只带工具名，而是通过 `tool_call_id` 精确对应某一次工具请求；多个工具并行调用时，配对错就会把结果挂到错误的问题上。
+
 ### 7. 测试用例
 
 单工具 / 多工具 / 无工具
@@ -122,7 +140,11 @@ README 就是项目的"说明书"，不写你就是项目唯一的用户，写�
      { 没有 tool_calls → 模型直接回答了 → 返回 }
 面试必会：
 
-为什么要有 MAX_STEPS / 超时？ → 防止死循环和成本失控。这是工程上的「防御性设计」，面试官一听就知道你不是只会写 demo。
+为什么要有 MAX_STEPS / 超时？ → 两者防的是不同失控：
+- **最大步数**：限制 Agent Loop 能循环/调用 LLM 多少轮，防止模型反复调工具绕圈，同时控制 Token 成本和延迟。
+- **超时**：限制真实耗时。某一次模型请求或工具调用可能卡住，此时步数还没增加，只有超时能终止等待。
+- 工程上通常同时加三层护栏：单次操作超时 + 整个任务超时 + 最大步数。
+- 一句话：最大步数限制“循环太多次”，超时限制“某一步或整体太慢”。
 
 for 循环 vs while True？ → for 有天然上限，while 要自己管退出条件。答「用 for + 步数上限」体现你的谨慎。
 上下文窗口管理 → token 是钱的单位。裁剪策略：system 全保留（定义行为），非 system 只留最近 N 轮，被裁的用摘要替换。

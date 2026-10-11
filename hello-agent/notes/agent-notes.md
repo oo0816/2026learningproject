@@ -41,6 +41,24 @@ while True:
     直到模型说"做完了，答案是 Z"——退出
 ```
 
+### 4.1 最大步数 vs 超时
+
+两者防的是两类不同的失控：
+
+- **最大步数**：限制 Agent Loop 最多循环/调用 LLM 多少轮。  
+  模型可能反复调用工具、来回思考，步数上限保证它最终停下来，同时控制 Token 成本和延迟。
+
+- **超时**：限制真实经过的时间。  
+  某一次模型请求或工具调用可能卡住；这时步数可能还停在第一轮，只有超时能终止等待。
+
+工程上通常同时设置三层：
+
+1. 单次操作超时（一次 LLM 请求/工具调用）
+2. 整个任务超时（一次用户任务总共能运行多久）
+3. 最大步数（最多允许循环多少轮）
+
+一句话：**最大步数限制“循环太多次”，超时限制“某一步或整体太慢”。**
+
 ## L1
 
 ### 5. Step vs Tool Call Count
@@ -64,6 +82,24 @@ API 看到消息3时，会往前找：哪个 assistant 消息声明过 `tool_cal
 user 问 → assistant 答/调工具 → tool 返回结果 → assistant 再答
 
 assistant 永远是说话的那一方，tool 只是替它跑腿。
+
+多工具并行调用示例：
+
+```text
+assistant:
+  tool_calls = [
+    { id: "call_1", name: "get_weather", arguments: {"city": "北京"} },
+    { id: "call_2", name: "get_weather", arguments: {"city": "深圳"} }
+  ]
+
+tool:
+  { tool_call_id: "call_1", content: "北京：5°C" }
+
+tool:
+  { tool_call_id: "call_2", content: "深圳：28°C" }
+```
+
+关键点：`tool` 结果不是只带工具名，而是通过 `tool_call_id` 精确对应某一次工具请求；多个工具并行调用时，配对错就会把结果挂到错误的问题上。
 
 ### 7. 测试用例
 
