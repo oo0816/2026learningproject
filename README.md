@@ -1,50 +1,65 @@
-# 2026 学习工作区：徒手造一个 Agent
+# 2026 Agent 工程学习工作区
 
-我是王敏乐，大连理工软件工程 2024 级。2026 年 8 月底，我给自己定了一条路线：**不套框架，把 Agent 的每一层都自己实现一遍**——从最小循环，到工具、记忆、harness，再到能交付给别人用的 skill。
+> 大连理工 985 · 软件工程 2024 级（2028 届）｜ GPA 86 ｜ CET-6 538
+> 目标岗位：AI Agent 开发工程师（主线）／ AI 产品经理（Agent 方向）
+> 求职窗口：2027.07–08 暑期实习 → 2027.09–11 秋招
 
-这个仓库就是这条路线的工作区，核心内容都在 [`hello-agent/`](hello-agent/) 里。
-
----
-
-## 这 7 周我做了什么
-
-**① 先让一个循环转起来（L0 → L1）**
-读 hello-agents 的前几章打底，然后手写最小 Agent Loop：observe → think → act，190 行，配了测试用例。读完的总结在 [`notes/l0-reading-summary.md`](hello-agent/notes/l0-reading-summary.md)，代码在 [`projects/l1-mini-agent/`](hello-agent/projects/l1-mini-agent/)。
-
-**② 给它装上工具、记忆和 RAG（L2）**
-398 行主流程；记忆单独拆出来做了三层（271 行），检索 325 行，工具层 316 行。笔记在 [`notes/l2-note.md`](hello-agent/notes/l2-note.md) 和 [`l2-rag-memory-card.md`](hello-agent/notes/l2-rag-memory-card.md)。
-
-**③ 拆真实 harness，然后自己造一个（L3）**
-先把 learn-claude-code 的 s01–s17 顺着读了一遍，再用自己的写法实现了一个 nano harness：tool registry、权限闸门、会话存储、上下文压缩，1294 行，另配自己的测试。读完答了一份「五问必答」架构笔记（268 行）：[`notes/l3-harness-anatomy.md`](hello-agent/notes/l3-harness-anatomy.md)、追问记录 [`l3-nano-harness-qna.md`](hello-agent/notes/l3-nano-harness-qna.md)。
-
-**④ 把能力打包成一个真有人用的 skill（L4）**
-挑了件自己真需要的事：中日合办项目里专业课用日语上，课件和历年真题都是日文，复习很费劲。于是做了 [japanese-exam-review](https://github.com/oo0816/-japanese-exam-review-skill)，把日语课件和试卷变成中日对照的复习文档 PDF——细节见下面「作品」一节。
-同一阶段**没用任何 SDK，手写了一个 MCP server + client**（121 + 140 行）把协议跑通：代码在 [`projects/l4-skills-mcp/`](hello-agent/projects/l4-skills-mcp/)，概念梳理在 [`notes/l4-skill-mcp-qna.md`](hello-agent/notes/l4-skill-mcp-qna.md)。
-
-**⑤ 多 Agent 协作，以及怎么验证它（L5）**
-1652 行写了一个多 Agent 流程：supervisor 派活、Reviewer 不过就退回改、改满次数强制收口、超时优雅终止、敏感动作走人工确认闸门，全程留 trace；检索接的是真实 Web Search（博查 API）。同时把「怎么证明它行」也设计了——15 条评测用例，覆盖正常流程 / 修改循环 / 超时保护 / 边界 / 工具异常 / 多轮对话。代码在 [`projects/l5-multi-agent/`](hello-agent/projects/l5-multi-agent/)，用例表在同目录 `evals.md`。
-
-**⑥ 交付真实项目（L6）**
-刚起了脚手架 [`projects/l6-final-agent/`](hello-agent/projects/l6-final-agent/)，还没开始写。
+本仓库记录一条 Agent 工程学习路线的完整过程：**不使用 LangGraph / AutoGen 等现成框架**，按 L0 → L6 逐层实现 Agent 的核心部件——循环、工具、记忆、harness、skill 封装、MCP、多 Agent 协作——每一层都留下可运行、可复现的产出物。核心内容位于 [`hello-agent/`](hello-agent/)。
 
 ---
 
-## 🚀 作品：japanese-exam-review
+## 路线与产出（L0 → L6）
+
+### L0 · Agent 认知
+读 hello-agents 前几章，产出读书总结。
+产出：[`notes/l0-reading-summary.md`](hello-agent/notes/l0-reading-summary.md)
+
+### L1 · 最小 Agent Loop
+手写 observe → think → act 循环，190 行，含测试用例。
+产出：[`projects/l1-mini-agent/`](hello-agent/projects/l1-mini-agent/)
+
+### L2 · 工具调用 + 记忆 + RAG
+主流程 398 行；记忆（271 行，三层结构）、检索（325 行）、工具层（316 行）分别实现。
+产出：[`projects/l2-rag-agent/`](hello-agent/projects/l2-rag-agent/)、笔记 [`notes/l2-note.md`](hello-agent/notes/l2-note.md) 与 [`l2-rag-memory-card.md`](hello-agent/notes/l2-rag-memory-card.md)
+
+### L3 · Harness 拆解与自建
+精读 learn-claude-code 的 s01–s17 后，自建 nano harness：tool registry、权限闸门、会话存储、上下文压缩，共 1294 行，含独立测试。
+产出：[`projects/l3-nano-harness/`](hello-agent/projects/l3-nano-harness/)、架构笔记（268 行「五问必答」）[`notes/l3-harness-anatomy.md`](hello-agent/notes/l3-harness-anatomy.md) 与 [`l3-nano-harness-qna.md`](hello-agent/notes/l3-nano-harness-qna.md)
+
+### L4 · Skill 封装 + 手写 MCP
+- 完整交付一个可复用 skill，见下节「作品」。
+- 不使用任何 SDK，手写 MCP server + client（121 + 140 行）跑通协议。
+产出：[`projects/l4-skills-mcp/`](hello-agent/projects/l4-skills-mcp/)、概念梳理 [`notes/l4-skill-mcp-qna.md`](hello-agent/notes/l4-skill-mcp-qna.md)
+
+### L5 · 多 Agent 协作 + 评测设计
+1652 行实现多 Agent 流程：supervisor 调度、Reviewer 修改循环、修改次数上限、超时保护、敏感操作人工确认闸门、全链路 trace；检索接入博查 Web Search API。
+评测：已设计 15 条用例，覆盖正常流程 / 修改循环 / 超时保护 / 边界 / 工具异常 / 多轮对话（尚未跑分）。
+产出：[`projects/l5-multi-agent/`](hello-agent/projects/l5-multi-agent/)（含 `evals.md`）
+
+### L6 · 交付真实项目
+脚手架已建，尚未开始。
+产出：[`projects/l6-final-agent/`](hello-agent/projects/l6-final-agent/)
+
+---
+
+## 作品：japanese-exam-review
 
 独立仓库：[oo0816/-japanese-exam-review-skill](https://github.com/oo0816/-japanese-exam-review-skill)
 
-解决的问题很具体：中日合办项目里，专业课用日语上，课件和真题都是日文。我把「日语课件 + 历年试卷 → 中日对照的复习 PDF」做成了一个可复用的 skill。做的时候比较较真的几处：
+**用途**：面向中日合办项目的学生——专业课用日语授课，课件与历年真题均为日文。该 skill 把日语课件（PDF / PPTX）与试卷转换为中日对照的复习文档 PDF。
 
-- **版式**：不想每次生成都长得不一样，所以写了个统一版式引擎 `guide_style.py`（251 行，单字体 + 3 组强调色），并留了两条制作通路（直接写代码 / 写内容 JSON），两条通路产出逐页一致。
-- **两种用法**：只有课件时，按讲义顺序逐章梳理（复习模式）；手里有真题时，先抽成考点库、再以考点为主线组织（考点模式）。
-- **能不能复跑**：补了 `smoke_test.py` 冒烟测试（依赖 / 字体 / 语法 / 结构 / 覆盖率 / 两条通路渲染）和覆盖率检查 `check_coverage.py`，让别人——也包括三个月后的我——一条命令就能验证它没坏。
-- **优化记录**：用 darwin-skill 跑了 4 轮自动优化，评分 **75.7 → 82.7**，4 轮改动全部保留；基线和每轮记录（`EVALUATION-*.md`）都留在仓库里。
+**实现要点**
 
-它原来放在本仓库 `hello-agent/skills/` 下，后来独立成了仓库；本仓库里保留了 [一个指向它的链接](hello-agent/skills/japanese-exam-review)。
+- **统一版式引擎** `guide_style.py`（251 行，单字体 + 3 组强调色）；提供两条制作通路（直接写代码 / 写内容 JSON），两者产出版式逐页一致，避免同类文档风格漂移。
+- **两种内容模式**：仅有课件时按讲义顺序逐章梳理（复习模式）；有真题时先抽取考点库，再以考点为主线组织文档（考点模式）。
+- **可复现性**：`smoke_test.py` 冒烟测试（依赖 / 字体 / 语法 / 结构 / 覆盖率 / 两条通路渲染）与 `check_coverage.py` 覆盖率检查，一条命令完成回归验证。
+- **优化记录**：经 darwin-skill 4 轮自动优化，评分 75.7 → 82.7（4 轮改动全部保留）；基线与各轮记录见仓库内 `EVALUATION-*.md`。
+
+该 skill 原位于本仓库 `hello-agent/skills/` 下，现已独立成仓库；本仓库保留一个[指向它的链接](hello-agent/skills/japanese-exam-review)。
 
 ---
 
-## 现在在哪
+## 当前进度
 
 | Level | 主题 | 状态 | 产出物 |
 |---|---|---|---|
@@ -56,11 +71,15 @@
 | L5 | 多 Agent + 评测 | 🔵 进行中 | [`projects/l5-multi-agent/`](hello-agent/projects/l5-multi-agent/)（supervisor + 护栏 + trace + Web Search，评测待跑） |
 | L6 | 交付真实项目 | ⬜ 未开始 | [`projects/l6-final-agent/`](hello-agent/projects/l6-final-agent/) |
 
-整体进度约 **71%**。**接下来 90 天**：① 接一个真实 MCP server，把 L4 收尾；② 跑完 L5 那 15 条评测并写总结；③ 把 L2 / L5 从"练习"打磨成"能点开、能演示"的成品，并补上产品侧文档——这条正好是 [`求职目录/03`](求职目录/03-项目与作品集.md) 里规划的路线。
+整体进度约 **71%**。**下一阶段（90 天）**：
+
+1. 接入一个真实 MCP server，收尾 L4；
+2. 跑完 L5 的 15 条评测用例并输出总结；
+3. 将 L2 / L5 从练习代码升级为可部署、可演示的成品，并补齐产品侧文档（PRD / 竞品分析 / 原型）——对应 [`求职目录/03`](求职目录/03-项目与作品集.md) 的规划。
 
 ---
 
-## 📂 仓库结构
+## 仓库结构
 
 ```
 2026learningproject/
@@ -77,21 +96,16 @@
 
 ---
 
-## 更新的习惯
+## 更新节奏
 
-- **每天**：至少一次提交，产出物当天落到仓库里，不攒着。
-- **每周日**：复盘一周，更新路线图的打勾和进度。
-- **每月末**：对着 [`求职目录/02-学习路线图.md`](求职目录/02-学习路线图.md) 过一遍里程碑。
+- **每日**：至少一次提交，当天产出物当天入库。
+- **每周日晚**：复盘并更新路线图进度。
+- **每月末**：对照 [`求职目录/02-学习路线图.md`](求职目录/02-学习路线图.md) 检查里程碑。
 
-从 8/26 开工到现在，累计 29 次提交；提交基本都对应具体产出（笔记、代码或一次重构），不是打卡式空提交。
+自 2026-08-26 起累计 29 次提交，提交内容多为具体产出（笔记、代码、重构），无空提交。
 
 ---
 
-## 关于我
+## 相关文档
 
-大连理工 985 · 软件工程 2024 级 · GPA 86 ｜ CET-6 538 —— Agent 生态的文档和论文基本都是英文，习惯直接读一手资料。
-
-求职方向：AI Agent 开发工程师（主线）／ AI 产品经理（Agent 方向）
-时间窗：2027.07–08 暑期实习 → 2027.09–11 秋招（2028 届）
-
-规划与自我诊断（双线策略、路线图、作品集、时间线）都在 [`求职目录/`](求职目录/00-README.md) 里。
+求职规划（双线策略、学习路线图、作品集、资源清单、时间线）见 [`求职目录/`](求职目录/00-README.md)。
