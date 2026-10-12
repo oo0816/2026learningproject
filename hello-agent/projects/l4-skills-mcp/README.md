@@ -11,6 +11,7 @@
 - `skills/japanese-exam-review/SKILL.md` — 第一个完整 skill（自选主题：日语 CS 复习 PDF 生成器）✅
 - `skills/japanese-exam-review/scripts/` — 配套脚本（guide_style 版式引擎 / 双通路渲染 / check_coverage）
 - `skills/japanese-exam-review/examples/` — 输出模板/示例 JSON
+- 🔗 该技能已独立成仓库：<https://github.com/oo0816/-japanese-exam-review-skill>（本地 `skills/japanese-exam-review/` 是指向该仓库的链接）
 - `projects/l4-skills-mcp/l4-skills-vs-tools.md` — 概念对比表
 - `projects/l4-skills-mcp/l4-skill-optimization-log.md` — darwin-skill 优化记录（75.7→82.7）
 

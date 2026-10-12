@@ -11,3 +11,7 @@ venv/
 .idea/
 ~$*
 *.tmp
+
+# 日语复习技能已独立成仓库（https://github.com/oo0816/-japanese-exam-review-skill）
+# 此目录是指向 D:\skills\japanese-exam-review 的链接，不再入库
+skills/japanese-exam-review/

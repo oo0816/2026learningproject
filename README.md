@@ -33,7 +33,7 @@ hello-agent/
 │   ├── l4-skills-mcp/          （l4-skills-vs-tools.md 对比表 + 优化日志）
 │   └── l5-multi-agent/（进行中） · l6-final-agent/（脚手架）
 ├── skills/
-│   └── japanese-exam-review/   ← ★ 第一个完整 skill（L4 交付物）：日语 CS 复习 PDF 生成器
+│   └── japanese-exam-review/   ← ★ 第一个完整 skill（L4 交付物）：日语 CS 复习 PDF 生成器（已独立成仓库，见下方链接）
 └── README.md                   ← Agent Learning Hub（外部参考整理）
 ```
 
@@ -46,7 +46,7 @@ hello-agent/
 按 git 历史从近到远：
 
 - **09.07 · L4 概念笔记（今天）**：把和 Claude 的一轮追问整理成 [`notes/l4-skill-mcp-qna.md`](hello-agent/notes/l4-skill-mcp-qna.md)（Skill/Tool/MCP/A2A 四层关系、MCP Server 与协议线格式、MCP vs API、skill 加载机制），并填完 [`l4-skills-vs-tools.md`](hello-agent/projects/l4-skills-mcp/l4-skills-vs-tools.md) 的三道空白题（正好覆盖路线图 L4 的 B 线验证）。
-- **09.07 · 主打 skill 重建 + darwin 优化**：把 [`japanese-exam-review`](hello-agent/skills/japanese-exam-review/) 从 reportlab 数据驱动**整个重建**为"统一版式引擎 `guide_style.py` + 通路A直写/通路B JSON + 复习/考点双模式"，随后 darwin-skill 2.0 跑 4 轮优化 **75.7 → 82.7**（Δ+7.0，全部 keep），并补了 3 场景 test-prompts 与 EVALUATION 运行记录。
+- **09.07 · 主打 skill 重建 + darwin 优化**：把 [`japanese-exam-review`](https://github.com/oo0816/-japanese-exam-review-skill) 从 reportlab 数据驱动**整个重建**为"统一版式引擎 `guide_style.py` + 通路A直写/通路B JSON + 复习/考点双模式"，随后 darwin-skill 2.0 跑 4 轮优化 **75.7 → 82.7**（Δ+7.0，全部 keep），并补了 3 场景 test-prompts 与 EVALUATION 运行记录。
 - **09.03–09.05 · L3 完成**：读透 learn-claude-code 与自建 nano harness，产出 [`l3-harness-anatomy.md`](hello-agent/notes/l3-harness-anatomy.md)（五问必答）+ 对比差异笔记。
 
 > 完整提交历史见本仓库 `git log`；具体进度以 [`hello-agent/notes/README.md`](hello-agent/notes/README.md) 打勾清单为准。
@@ -63,7 +63,7 @@ hello-agent/
 | L1 | 最小 Agent Loop（第一个里程碑） | ✅ 完成 | `projects/l1-mini-agent/` |
 | L2 | 工具 + 记忆 + RAG | ✅ 完成（验收记录待补） | `projects/l2-rag-agent/` + `notes/l2-note.md` |
 | L3 | Harness 源码拆解（核心阶段） | ✅ 完成 | `projects/l3-nano-harness/` + `notes/l3-harness-anatomy.md` |
-| L4 | Skills + MCP + 能力打包 | 🔵 **进行中** | `skills/japanese-exam-review/` + L4 概念笔记 |
+| L4 | Skills + MCP + 能力打包 | 🔵 **进行中** | [`skills/japanese-exam-review/`](https://github.com/oo0816/-japanese-exam-review-skill)（已独立成仓库） + L4 概念笔记 |
 | L5 | 多 Agent + 评测 | 🔵 **进行中** | `projects/l5-multi-agent/main.py` + `evals.md` 骨架 |
 | L6 | 交付真实项目（最终产出） | ⬜ 未开始 | `projects/l6-final-agent/` |
 
