@@ -22,6 +22,63 @@ Agent(Loop 编排) ─┬─ ToolRegistry    工具有没有、怎么调（注�
 
 ---
 
+## 0. Harness 在 Agent 系统中的位置（总览图）
+
+> 图：`notes/media/harness-diagram.png`（可编辑源文件：`notes/media/harness-diagram.html`）
+
+![Harness 在 Agent 系统中的位置](media/harness-diagram.png)
+
+一句话：
+
+> **LLM 是大脑，Harness 是骨架和驾驶舱；模型负责想，Harness 负责把想法安全地变成行动。**
+
+### 0.1 分工表
+
+| 部分 | 角色 | 负责什么 |
+|---|---|---|
+| LLM 模型 | 大脑 | 理解、推理、决定下一步；输出文本或 `tool_calls` |
+| Harness | 骨架 / 驾驶舱 | 调度循环、执行工具、权限检查、管理上下文、保存会话、记日志 |
+| Tools | 手脚 | 计算器、搜索、文件、邮件、MCP 等真正干活的工具 |
+| Memory | 记忆 | `messages`、会话记忆、长期记忆 |
+| Permission Gate | 刹车 | `allow / ask / deny`，拦截危险操作 |
+| 外部环境 | 真实世界 | 文件系统、网络、数据库、外部 API、MCP Server |
+
+### 0.2 一次循环
+
+1. Harness 把 `messages + 工具清单` 交给 LLM
+2. LLM 返回文本，或返回 `tool_calls`
+3. Harness 解析 `tool_calls`
+4. `PermissionGate` 判断：允许 / 询问 / 拒绝
+5. `ToolRegistry` 真正执行工具
+6. 结果写回 `messages`，保存 session，写日志
+7. Harness 再交给 LLM
+8. 重复，直到模型给出最终答案
+
+### 0.3 对应本项目的代码
+
+| 图中的模块 | 本项目的位置 |
+|---|---|
+| LLM 模型 | `main.py` 里的 DeepSeek `chat.completions.create` |
+| Agent Loop | `Agent.run()` |
+| Tool Registry | `ToolRegistry` |
+| Permission Gate | `PermissionGate` |
+| Session Store | `SessionStore` |
+| Context Compactor | `Agent._manage_context()` |
+| Logger / Trace | `Logger` |
+| Tools | `TOOL_DEFINITIONS` 里的 `calculator / get_weather / web_search / send_email` |
+| Memory | `messages` + `SessionStore` |
+
+### 0.4 两个比喻
+
+- **开车**：LLM = 司机的大脑；Harness = 车（方向盘、油门、刹车、仪表盘、安全带）；Tools = 手脚和工具箱；Memory = 行车记录仪和导航历史；Permission Gate = 刹车和门禁。
+- **公司**：LLM = 提方案的人；Harness = 项目经理 + 流程 + 审批 + 档案；Tools = 一线执行；Memory = 公司档案；Permission Gate = 风控。
+
+### 0.5 记住这一句
+
+> **模型负责想，Harness 负责管、执行、拦、记。**
+
+---
+
 ## 必答 1：agent loop 在哪个文件？核心逻辑多少行？
 
 **答**：agent 的主循环写在本项目唯一的 `main.py` 里，具体在 `Agent.run()` 方法中（行号 1011–1095），循环体本身约 40 行（1046–1088）。
@@ -208,3 +265,4 @@ schema 的完整结构（OpenAI function-calling 格式，见 730–745）：
 | 防套娃 | 复用 create_agent 时不给 sub 注册 task 工具 | 由「干净 Agent」设计自然规避 |
 
 **一句话：在我的 harness 里，subagent = 一个会再跑一个 Agent 的工具。加它 = 加函数 + 注册一行，主循环一行不用改。**
+

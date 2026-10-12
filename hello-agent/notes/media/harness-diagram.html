@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Harness 在 Agent 系统中的位置</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #f8fafc; }
+  svg { display: block; }
+  text { font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif; }
+  .title { font-size: 40px; font-weight: 800; fill: #0f172a; }
+  .subtitle { font-size: 18px; fill: #475569; }
+  .box-title { font-size: 20px; font-weight: 700; fill: #0f172a; }
+  .box-sub { font-size: 15px; fill: #334155; }
+  .small { font-size: 14px; fill: #475569; }
+  .tiny { font-size: 13px; fill: #334155; }
+  .arrow-label { font-size: 13px; fill: #475569; }
+  .panel-title { font-size: 18px; font-weight: 800; fill: #0f172a; }
+  .step { font-size: 13.5px; fill: #334155; }
+</style>
+</head>
+<body>
+<svg width="1700" height="1200" viewBox="0 0 1700 1200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#475569"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#0284c7"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#7c3aed"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect x="0" y="0" width="1700" height="1200" fill="#f8fafc"/>
+
+  <text x="850" y="58" text-anchor="middle" class="title">Harness 在 Agent 系统中的位置</text>
+  <text x="850" y="98" text-anchor="middle" class="subtitle">模型负责“想”，Harness 负责把想法变成可执行、可控、可追踪的流程</text>
+
+  <!-- LLM -->
+  <rect x="560" y="140" width="500" height="130" rx="18" fill="#ede9fe" stroke="#7c3aed" stroke-width="3" filter="url(#shadow)"/>
+  <text x="810" y="180" text-anchor="middle" class="box-title">LLM 模型（大脑）</text>
+  <text x="810" y="210" text-anchor="middle" class="box-sub">只负责：理解、推理、决定下一步</text>
+  <text x="810" y="238" text-anchor="middle" class="box-sub">输出文本 或 tool_calls</text>
+
+  <!-- arrows LLM <-> Harness -->
+  <line x1="740" y1="272" x2="740" y2="328" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrowPurple)"/>
+  <text x="726" y="305" text-anchor="end" class="arrow-label">文本 / tool_calls</text>
+
+  <line x1="880" y1="328" x2="880" y2="272" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrowPurple)"/>
+  <text x="894" y="305" text-anchor="start" class="arrow-label">messages + 工具清单</text>
+
+  <!-- Harness -->
+  <rect x="300" y="330" width="1020" height="460" rx="24" fill="#e0f2fe" stroke="#0284c7" stroke-width="4" filter="url(#shadow)"/>
+  <text x="810" y="374" text-anchor="middle" class="panel-title" fill="#075985">HARNESS（驾驶舱 / 骨架）</text>
+
+  <rect x="360" y="400" width="900" height="72" rx="14" fill="#ffffff" stroke="#38bdf8" stroke-width="2.5"/>
+  <text x="810" y="430" text-anchor="middle" class="box-title">① Agent Loop（主循环）</text>
+  <text x="810" y="456" text-anchor="middle" class="small">问模型 → 解析 tool_calls → 权限检查 → 执行工具 → 结果写回 → 再问模型，直到完成</text>
+
+  <rect x="360" y="500" width="280" height="100" rx="14" fill="#ffffff" stroke="#38bdf8" stroke-width="2.5"/>
+  <text x="500" y="530" text-anchor="middle" class="box-title">② Tool Registry</text>
+  <text x="500" y="558" text-anchor="middle" class="small">登记工具</text>
+  <text x="500" y="580" text-anchor="middle" class="small">校验参数并执行</text>
+
+  <rect x="670" y="500" width="280" height="100" rx="14" fill="#ffffff" stroke="#f87171" stroke-width="2.5"/>
+  <text x="810" y="530" text-anchor="middle" class="box-title">③ Permission Gate</text>
+  <text x="810" y="558" text-anchor="middle" class="small">allow / ask / deny</text>
+  <text x="810" y="580" text-anchor="middle" class="small">危险操作要拦截</text>
+
+  <rect x="980" y="500" width="280" height="100" rx="14" fill="#ffffff" stroke="#38bdf8" stroke-width="2.5"/>
+  <text x="1120" y="530" text-anchor="middle" class="box-title">④ Session Store</text>
+  <text x="1120" y="558" text-anchor="middle" class="small">保存会话</text>
+  <text x="1120" y="580" text-anchor="middle" class="small">恢复历史</text>
+
+  <rect x="360" y="630" width="430" height="92" rx="14" fill="#ffffff" stroke="#38bdf8" stroke-width="2.5"/>
+  <text x="575" y="660" text-anchor="middle" class="box-title">⑤ Context Compactor</text>
+  <text x="575" y="688" text-anchor="middle" class="small">上下文太长时裁剪 / 摘要</text>
+
+  <rect x="830" y="630" width="430" height="92" rx="14" fill="#ffffff" stroke="#38bdf8" stroke-width="2.5"/>
+  <text x="1045" y="660" text-anchor="middle" class="box-title">⑥ Logger / Trace</text>
+  <text x="1045" y="688" text-anchor="middle" class="small">记录每一步：工具、参数、结果、耗时</text>
+
+  <text x="810" y="762" text-anchor="middle" class="small" fill="#075985">Harness 负责：调度循环、权限审批、执行工具、管理上下文、保存会话、记录日志</text>
+
+  <!-- User -->
+  <rect x="40" y="480" width="200" height="140" rx="18" fill="#fee2e2" stroke="#dc2626" stroke-width="3" filter="url(#shadow)"/>
+  <text x="140" y="522" text-anchor="middle" class="box-title">用户 / 输入</text>
+  <text x="140" y="552" text-anchor="middle" class="small">问问题</text>
+  <text x="140" y="578" text-anchor="middle" class="small">提任务</text>
+
+  <line x1="242" y1="520" x2="296" y2="520" stroke="#dc2626" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="296" y1="580" x2="242" y2="580" stroke="#dc2626" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="268" y="505" text-anchor="middle" class="arrow-label">请求</text>
+  <text x="268" y="602" text-anchor="middle" class="arrow-label">回答</text>
+
+  <!-- Tools -->
+  <rect x="180" y="860" width="520" height="130" rx="18" fill="#dcfce7" stroke="#16a34a" stroke-width="3" filter="url(#shadow)"/>
+  <text x="440" y="900" text-anchor="middle" class="box-title">Tools（手脚）</text>
+  <text x="440" y="930" text-anchor="middle" class="box-sub">计算器 / 搜索 / 文件 / 邮件 / MCP</text>
+  <text x="440" y="958" text-anchor="middle" class="small">模型说“我想调它”，Harness 真正去执行</text>
+
+  <line x1="510" y1="792" x2="450" y2="856" stroke="#16a34a" stroke-width="3" marker-end="url(#arrowGreen)"/>
+  <text x="500" y="825" text-anchor="start" class="arrow-label">执行工具</text>
+
+  <!-- Memory -->
+  <rect x="780" y="860" width="540" height="130" rx="18" fill="#fef3c7" stroke="#d97706" stroke-width="3" filter="url(#shadow)"/>
+  <text x="1050" y="900" text-anchor="middle" class="box-title">Memory（记忆）</text>
+  <text x="1050" y="930" text-anchor="middle" class="box-sub">messages / session / 长期记忆</text>
+  <text x="1050" y="958" text-anchor="middle" class="small">让 Agent 跨轮次、跨会话记得住</text>
+
+  <line x1="1010" y1="792" x2="1055" y2="856" stroke="#d97706" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="1068" y="825" text-anchor="start" class="arrow-label">读写记忆</text>
+
+  <!-- Real world -->
+  <rect x="300" y="1040" width="1020" height="100" rx="18" fill="#f1f5f9" stroke="#64748b" stroke-width="3" filter="url(#shadow)"/>
+  <text x="810" y="1080" text-anchor="middle" class="box-title">真实世界</text>
+  <text x="810" y="1110" text-anchor="middle" class="box-sub">文件系统 / 网络 / 数据库 / 外部 API / MCP Server</text>
+
+  <line x1="440" y1="992" x2="440" y2="1036" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="1050" y1="992" x2="1050" y2="1036" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <!-- Right panel: loop -->
+  <rect x="1380" y="140" width="280" height="320" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="1520" y="178" text-anchor="middle" class="panel-title">一次循环</text>
+  <text x="1404" y="212" class="step">1. Harness 把 messages + tools</text>
+  <text x="1404" y="234" class="step">   交给 LLM</text>
+  <text x="1404" y="262" class="step">2. LLM 返回文本或 tool_calls</text>
+  <text x="1404" y="290" class="step">3. Permission Gate 判断</text>
+  <text x="1404" y="312" class="step">   allow / ask / deny</text>
+  <text x="1404" y="340" class="step">4. Tool Registry 执行工具</text>
+  <text x="1404" y="368" class="step">5. 结果写回 messages</text>
+  <text x="1404" y="390" class="step">   存 session、记日志</text>
+  <text x="1404" y="418" class="step">6. 再交给 LLM，直到完成</text>
+
+  <!-- Right panel: legend -->
+  <rect x="1380" y="490" width="280" height="300" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="1520" y="528" text-anchor="middle" class="panel-title">记住这个分工</text>
+  <text x="1404" y="562" class="step"><tspan font-weight="700">LLM</tspan> = 大脑：想</text>
+  <text x="1404" y="592" class="step"><tspan font-weight="700">Harness</tspan> = 骨架/驾驶舱：</text>
+  <text x="1404" y="614" class="step">  调度、约束、记录</text>
+  <text x="1404" y="644" class="step"><tspan font-weight="700">Tools</tspan> = 手脚：做事</text>
+  <text x="1404" y="674" class="step"><tspan font-weight="700">Memory</tspan> = 记忆：保存</text>
+  <text x="1404" y="704" class="step"><tspan font-weight="700">Permission</tspan> = 刹车：</text>
+  <text x="1404" y="734" class="step">   拦截危险操作</text>
+
+  <!-- Right panel: note -->
+  <rect x="1380" y="820" width="280" height="220" rx="18" fill="#fff7ed" stroke="#fb923c" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="1520" y="858" text-anchor="middle" class="panel-title" fill="#9a3412">Harness 不是模型</text>
+  <text x="1404" y="892" class="step">它是模型外面的工程骨架。</text>
+  <text x="1404" y="924" class="step">没有 Harness：</text>
+  <text x="1404" y="954" class="step">模型只会“说”要调工具，</text>
+  <text x="1404" y="984" class="step">没人真正执行、拦截、</text>
+  <text x="1404" y="1012" class="step">保存、记录。</text>
+</svg>
+</body>
+</html>
+

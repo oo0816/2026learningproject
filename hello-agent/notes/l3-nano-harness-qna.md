@@ -20,6 +20,8 @@ Agent(Loop) ─┬─ ToolRegistry    工具有没有、怎么调（注册/校�
 
 **核心哲学（全文反复出现）**：每个类只做一件事，Registry 和 Gate 零耦合，Agent 只编排不实现。
 
+> 概念总览图与分工表见 [l3-harness-anatomy.md](l3-harness-anatomy.md) 的「0. Harness 在 Agent 系统中的位置」。
+
 **模块行号地图**：模块0 连接(96) · ToolRegistry(141) · PermissionGate(284) · SessionStore(419) · Logger(572) · 内置工具+TOOL_DEFINITIONS(650-812) · Agent(819) · CLI(1120) · 常见坑总结(1220)
 
 ---
@@ -238,3 +240,4 @@ Python 解释器启动时**自动填好**的命令行参数列表。`argv[0]` = 
 5. **不存在工具 = 被 deny**（走权限拒绝分支），不会走到 execute 的「未知工具」提示。
 6. **压缩先保护 system，tool 消息头部连删**（while 不是 if）。
 7. **CLI 分流三模式**：带非"-"参数=单次查询 / `--sessions`=列会话 / 否则交互聊天。
+

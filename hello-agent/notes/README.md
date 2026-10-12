@@ -38,7 +38,7 @@ L6  交付真实项目       █░░░░░░░░░░░░░░░░
 - [x] 能口头解释 agent loop 的 4 个阶段，不需要看笔记
 
 ### C线验证
-- [ ] 找出 Claude Code 里你日常用的 3 个场景（待单独记录），判断它们分别是 workflow 还是 agent
+- [x] 找出 Claude Code 里你日常用的 3 个场景（待单独记录），判断它们分别是 workflow 还是 agent
 
 ---
 
