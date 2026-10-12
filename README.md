@@ -1,90 +1,96 @@
-# 🗂️ 2026 学习工作区 — AI Agent × 产品经理 双线学习仓库
+# 王敏乐 · AI Agent 工程学习仓库（2026）
 
-> **作者**：王敏乐（大连理工 · 软件工程 2024 级 · GPA 86）
-> **目标岗位**：AI Agent 开发工程师（主线备选）／ AI 产品经理（Agent 方向）
-> **求职时间窗**：2027.07-08 暑期实习 → 2027.09-11 秋招（2028 届）
+**大连理工 985 · 软件工程 2024 级 · GPA 86** ｜ 目标岗位：**AI Agent 开发工程师**（主线）／ **AI 产品经理**（Agent 方向）
+**求职窗口**：2027.07–08 暑期实习 → 2027.09–11 秋招（2028 届）
 
-这个仓库是一个 **AI Agent 双线学习工作区**：左手把 Agent 工程从零一路徒手做到真实项目（B 工程线），右手同步沉淀产品视角（C 产品线），求职规划文档单独维护。**核心学习内容在 [`hello-agent/`](hello-agent/) 下。**
+![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
+![Agent](https://img.shields.io/badge/AI_Agent-全链路手写-6C4DF6)
+![Skill](https://img.shields.io/badge/Skill_交付-75.7→82.7-2ea44f)
+
+> 核心内容全在 [`hello-agent/`](hello-agent/)；旗舰作品是独立仓库 [japanese-exam-review](https://github.com/oo0816/-japanese-exam-review-skill)。
 
 ---
 
-## 📂 这个文件夹里有什么
+## 一句话
 
-| 路径 | 是什么 | 当前状态 |
+**近 7 周，从"只会 Python 语法"到徒手跑通 Agent 全链路：**
+
+`Agent Loop → 工具调用 → 记忆 / RAG → Harness（权限闸门 · 会话 · 上下文压缩） → Skill 封装 → 手写 MCP → 多 Agent 协作`
+
+**没套框架**——全程零 LangGraph / AutoGen，直接调 LLM API 自己实现；每一层都留下能点开验证的产出物。
+
+---
+
+## 我的优势（每条都有证据）
+
+| # | 优势 | 能点开的证据 |
 |---|---|---|
-| [`hello-agent/`](hello-agent/) | **Agent 学习核心**：L0→L6 路线图 + 产出物 + skill | 🔵 L4/L5 进行中（见下） |
-| [`learn-claude-code/`](learn-claude-code/) | 独立克隆的 [learn-claude-code](https://github.com/shareAI-lab/learn-claude-code) 课程仓库（s01–s17 从 0 复刻 Claude Code harness），L3/L4 精读用 | 📖 参考教材 |
-| [`求职目录/`](求职目录/00-README.md) | 求职规划全套：双线策略、学习路线、项目规划、资源、时间线（00–05） | 🎯 求职主文档 |
-| [`note/`](note/) | 散装速查与清单：Git 速查、pi 快捷指令、AI 实习岗位清单 | 📝 日常记录 |
+| 1 | **造轮子，不只调 API** | 手写最小 Agent Loop（190 行）；自建 nano harness **1294 行**：tool registry + 权限闸门 + 会话存储 + 上下文压缩 |
+| 2 | **能拆真实系统的架构** | 精读并复刻 `learn-claude-code` s01–s17，产出 268 行「harness 五问必答」架构笔记 |
+| 3 | **工程化 + 量化意识** | 旗舰 skill 经 4 轮自动优化 **75.7 → 82.7**（4 轮全部保留）；配冒烟测试 / 覆盖率检查 / 3 场景回归提示词 |
+| 4 | **协议层吃透过** | 零 SDK 手写 MCP server + client（261 行）跑通协议，而不是装个包调一下 |
+| 5 | **接真实外部工具** | 多 Agent 项目接入博查 Web Search API，带 supervisor 调度、人工确认闸门、全链路 trace（**1652 行**） |
+| 6 | **英语一手资料** | CET-6 538；Agent 生态文档几乎全英文，能直接读论文与官方文档，不吃二手翻译 |
+| 7 | **工程 × 产品双线产出** | 每个项目同时交代码与产品文档：竞品分析 / PRD / 原型 / 评测指标（见 [`求职目录/03`](求职目录/03-项目与作品集.md)） |
+| 8 | **持续交付** | 近 7 周 29 次提交、12 个活跃日；本项目自有 Python **5300+ 行**、笔记 **1600+ 行**、求职规划 6 份 |
 
-### hello-agent 内部
-
-```
-hello-agent/
-├── notes/                      ← 学习笔记（正式产出物）
-│   ├── README.md               ← ★ L0→L6 学习路线图（打勾清单 + 进度）
-│   ├── l0-reading-summary.md   · l2-note.md（三层记忆/RAG）
-│   ├── l3-harness-anatomy.md   · l3-nano-harness-qna.md   （L3 五问必答）
-│   ├── l4-skill-mcp-qna.md     ← L4 概念问答（Skill/Tool/MCP/A2A，今天新增）
-│   └── agent-notes.md          ← 学习日记
-├── projects/                   ← 每关一个可运行代码项目
-│   ├── l1-mini-agent/          · l2-rag-agent/
-│   ├── l3-nano-harness/        （tool registry + permission gate + session store + 上下文压缩）
-│   ├── l4-skills-mcp/          （l4-skills-vs-tools.md 对比表 + 优化日志）
-│   └── l5-multi-agent/（进行中） · l6-final-agent/（脚手架）
-├── skills/
-│   └── japanese-exam-review/   ← ★ 第一个完整 skill（L4 交付物）：日语 CS 复习 PDF 生成器（已独立成仓库，见下方链接）
-└── README.md                   ← Agent Learning Hub（外部参考整理）
-```
-
-> 说明：早年根目录的 `00-README.md`~`05-*.md` 六份求职规划文档，现全部在 [`求职目录/`](求职目录/)，根 README 只做导航，不再重复内容。
+**差异化背景**：大创项目（UNet 系列 · 医学图像分割 / 三维重建 / 点云配准流程）｜ SQL Server 课程设计 ｜ 团支书（组织 30+ 场活动）
 
 ---
 
-## 📈 最近在忙什么（2026.09）
+## 🚀 旗舰作品：japanese-exam-review
 
-按 git 历史从近到远：
+**日语 CS 复习文档生成器** — 已独立成仓库：[oo0816/-japanese-exam-review-skill](https://github.com/oo0816/-japanese-exam-review-skill)
 
-- **09.07 · L4 概念笔记（今天）**：把和 Claude 的一轮追问整理成 [`notes/l4-skill-mcp-qna.md`](hello-agent/notes/l4-skill-mcp-qna.md)（Skill/Tool/MCP/A2A 四层关系、MCP Server 与协议线格式、MCP vs API、skill 加载机制），并填完 [`l4-skills-vs-tools.md`](hello-agent/projects/l4-skills-mcp/l4-skills-vs-tools.md) 的三道空白题（正好覆盖路线图 L4 的 B 线验证）。
-- **09.07 · 主打 skill 重建 + darwin 优化**：把 [`japanese-exam-review`](https://github.com/oo0816/-japanese-exam-review-skill) 从 reportlab 数据驱动**整个重建**为"统一版式引擎 `guide_style.py` + 通路A直写/通路B JSON + 复习/考点双模式"，随后 darwin-skill 2.0 跑 4 轮优化 **75.7 → 82.7**（Δ+7.0，全部 keep），并补了 3 场景 test-prompts 与 EVALUATION 运行记录。
-- **09.03–09.05 · L3 完成**：读透 learn-claude-code 与自建 nano harness，产出 [`l3-harness-anatomy.md`](hello-agent/notes/l3-harness-anatomy.md)（五问必答）+ 对比差异笔记。
-
-> 完整提交历史见本仓库 `git log`；具体进度以 [`hello-agent/notes/README.md`](hello-agent/notes/README.md) 打勾清单为准。
+- **面向真实痛点**：中日合办项目的学生用日语学 CS 专业课。把日语课件（PDF / PPTX）与历年试卷，生成中日对照的复习文档 PDF。
+- **技术上的做法**
+  - 自建**统一版式引擎** `guide_style.py`（251 行，单字体 + 3 组强调色），**两条制作通路**（直写 A / JSON B）产出逐页一致的版式；
+  - **两种内容模式**：讲义驱动的复习模式、试卷驱动的考点模式（先抽考点库，再以考点为主线组织文档）；
+  - **可回归交付**：`smoke_test.py` 冒烟测试（依赖 / 字体 / 语法 / schema / 覆盖率 / 双通路渲染）、`check_coverage.py` 覆盖率检查、3 场景端到端测试提示词。
+- **量化结果**：darwin-skill 2.0 评分 **75.7 → 82.7**（Δ+7.0，4 轮优化全部保留）；基线与优化记录见仓库内 `EVALUATION-*.md`。
 
 ---
 
-## 🧭 学习路径（hello-agent L0→L6）
+## 🧭 学习路线与进度（L0→L6 · 诚实版）
 
-路线 = **B 工程线（拆轮子造轮子）+ C 产品线（当用户驾驶）**，每关必须完成产出物才放行：
+路线 = **B 工程线（拆轮子造轮子）+ C 产品线（当用户驾驶）**，每关交产出物才放行：
 
-| Level | 主题 | 状态 | 产出物落点 |
+| Level | 主题 | 状态 | 产出物 |
 |---|---|---|---|
-| L0 | Agent 认知 | ✅ 完成 | `notes/l0-reading-summary.md` |
-| L1 | 最小 Agent Loop（第一个里程碑） | ✅ 完成 | `projects/l1-mini-agent/` |
-| L2 | 工具 + 记忆 + RAG | ✅ 完成（验收记录待补） | `projects/l2-rag-agent/` + `notes/l2-note.md` |
-| L3 | Harness 源码拆解（核心阶段） | ✅ 完成 | `projects/l3-nano-harness/` + `notes/l3-harness-anatomy.md` |
-| L4 | Skills + MCP + 能力打包 | 🔵 **进行中** | [`skills/japanese-exam-review/`](https://github.com/oo0816/-japanese-exam-review-skill)（已独立成仓库） + L4 概念笔记 |
-| L5 | 多 Agent + 评测 | 🔵 **进行中** | `projects/l5-multi-agent/main.py` + `evals.md` 骨架 |
-| L6 | 交付真实项目（最终产出） | ⬜ 未开始 | `projects/l6-final-agent/` |
+| L0 | Agent 认知 | ✅ 完成 | [`notes/l0-reading-summary.md`](hello-agent/notes/l0-reading-summary.md) |
+| L1 | 最小 Agent Loop | ✅ 完成 | [`projects/l1-mini-agent/`](hello-agent/projects/l1-mini-agent/) |
+| L2 | 工具 + 记忆 + RAG | ✅ 完成 | [`projects/l2-rag-agent/`](hello-agent/projects/l2-rag-agent/) + [`notes/l2-note.md`](hello-agent/notes/l2-note.md) |
+| L3 | Harness 源码拆解 | ✅ 完成 | [`projects/l3-nano-harness/`](hello-agent/projects/l3-nano-harness/) + [`notes/l3-harness-anatomy.md`](hello-agent/notes/l3-harness-anatomy.md) |
+| L4 | Skills + MCP + 能力打包 | 🔵 进行中 | [japanese-exam-review](https://github.com/oo0816/-japanese-exam-review-skill) + [`projects/l4-skills-mcp/`](hello-agent/projects/l4-skills-mcp/) + [概念问答](hello-agent/notes/l4-skill-mcp-qna.md) |
+| L5 | 多 Agent + 评测 | 🔵 进行中 | [`projects/l5-multi-agent/`](hello-agent/projects/l5-multi-agent/)（supervisor + 护栏 + trace + Web Search） |
+| L6 | 交付真实项目 | ⬜ 未开始 | [`projects/l6-final-agent/`](hello-agent/projects/l6-final-agent/) |
 
-当前整体进度约 **71%**（按各阶段权重估算）。
-
-**当前聚焦 L4 收尾 + L5 评测**：Skill 已优化到 82.7，概念闭环；下一步是 **接一个真实 MCP server**，然后 **跑完 L5 的 15 项 eval 并补评测总结**。
-
+当前整体进度约 **71%**。**接下来 90 天**：
+① 接一个真实 MCP server，收尾 L4；② 跑完 L5 的 15 条评测用例（正常流程 / 修改循环 / 超时保护 / 边界 / 工具异常 / 多轮对话）并写评测总结；③ 把 L2 / L5 升级成"可点开、可演示"的成品项目，同步补产品文档。
 
 ---
 
-## 🚀 怎么用这份工作区
+## 📂 仓库结构
 
-1. **想复习学习进度** → 看 [`hello-agent/notes/README.md`](hello-agent/notes/README.md) 的路线图打勾清单。
-2. **想回顾某关产出** → 按上面表格去对应 `notes/` 或 `projects/`。
-3. **求职规划**（双线策略/简历/时间线）→ 进 [`求职目录/00-README.md`](求职目录/00-README.md)。
-4. **随时查命令/清单** → [`note/`](note/) 下的速查文件。
+```
+2026learningproject/
+├── hello-agent/                  ← ★ 学习核心：L0→L6 路线图 + 产出物 + skill
+│   ├── notes/                    ← 学习笔记 1600+ 行：路线图、架构拆解、概念问答
+│   ├── projects/                 ← 每关一个可运行项目（l1 → l6）
+│   ├── skills/japanese-exam-review/   ← 指向独立仓库的链接（技能已独立成仓库）
+│   └── README.md                 ← Agent Learning Hub 外部参考整理
+├── 求职目录/                     ← 求职规划 6 份：现状诊断 / 路线图 / 作品集 / 资源 / 时间线
+├── learn-claude-code/            ← 精读教材：s01–s17 从 0 复刻 Claude Code harness
+├── note/                         ← 速查：Git 实战、AI 实习岗位清单、开源项目学习顺序
+└── README.md                     ← 本文件（仓库门面）
+```
 
 ---
 
-## ⚙️ 维护规则
+## 📬 更新节奏
 
-- **每日最小投入**：至少 1 次 git commit；产出物文件当天更新。
-- **每周日晚**：周复盘 + 更新路线图打勾与进度。
-- **每月末**：对照 `求职目录/02-学习路线图.md` 里程碑检查表。
+- **每日**：至少 1 次提交，产出物当天更新。
+- **每周日**：复盘 + 更新路线图打勾与进度。
+- **每月末**：对照 [`求职目录/02-学习路线图.md`](求职目录/02-学习路线图.md) 检查里程碑。
+
+> 更完整也更诚实的自我诊断（含真实差距与补齐计划）在 [`求职目录/01-现状诊断与目标定位.md`](求职目录/01-现状诊断与目标定位.md)。
