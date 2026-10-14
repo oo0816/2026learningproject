@@ -5,6 +5,24 @@
 
 ---
 
+## 离线单元测试（不调用真实模型）
+
+> 运行日期：2026-10-14  
+> 命令：`D:\anaconda\python.exe test_l5_offline.py`  
+> 结果：**8 passed / 0 failed，耗时 0.011s**
+
+| # | 测试 | 覆盖内容 | 结果 |
+|---|---|---|---|
+| O1 | `test_01_reviewer_pass_first_time` | Reviewer 一次通过 | ✅ |
+| O2 | `test_02_revise_then_pass` | Reviewer 拒绝 → Writer 修改 → 通过 | ✅ |
+| O3 | `test_03_max_loops_force_pass` | 改满 `max_review_loops` 后强制放行 | ✅ |
+| O4 | `test_04_stuck_force_pass` | 连续两轮同一 `issue_type` → `stuck_force_pass` | ✅ |
+| O5 | `test_05_timeout` | 总超时保护，Research 阶段提前终止 | ✅ |
+| O6 | `test_06_human_gate_reject` | 人工闸门拒绝 → `ok(draft)` | ✅ |
+| O7 | `test_07_bad_input_empty` | 空输入 → `bad_input`，零 token | ✅ |
+| O8 | `test_08_trace_has_review_round` | Trace 记录评审轮次与闸门结果 | ✅ |
+
+> 说明：以上是假模型离线验证，证明控制流和护栏逻辑正确；真实模型质量、Token 与延迟仍需通过在线用例评测。
 ## 正常流程
 
 | # | 输入 | 预期行为 | 实际结果 | 耗时 | Token | 通过 |
@@ -77,3 +95,4 @@
 - 平均耗时：__s
 - 平均 Token：__
 - 最常见失败原因：__
+

@@ -1,0 +1,15 @@
+[
+  {
+    "id": 1,
+    "task": "帮我研究一下量子计算的最新进展，写一份 500 字报告",
+    "status": "ok(stuck_force_pass)",
+    "reason": "stuck_force_pass",
+    "review_loops": 1,
+    "total_time": 17.68,
+    "total_tokens": 7965,
+    "gate_approved": true,
+    "report_chars": 646,
+    "error": "",
+    "approval_mode": "auto"
+  }
+]

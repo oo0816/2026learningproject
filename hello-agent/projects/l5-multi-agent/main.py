@@ -50,7 +50,7 @@ Agent A ←→ Agent B  各自有专长，互相提问
 - **BaseAgent**：任意角色 agent 的基类，带 独立 messages + 可选工具 + tool-call 循环
 - **Researcher / Writer / Reviewer**：三个具体角色
 - **Supervisor**：编排 research → write → review（循环）+ 护栏（最大轮次 / 总超时）+ 人工确认闸门
-- **TraceLogger**：全链路调用追踪
+# - **TraceLogger**：全链路调用追踪
 - **依赖注入**：`model_fn` 可换成假模型，离线测试 / 评测不烧 token
 
 用法：`python main.py`

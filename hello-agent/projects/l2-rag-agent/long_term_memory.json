@@ -52,5 +52,14 @@
     ],
     "source": "agent",
     "created_at": "2026-08-28T19:11:11.137513"
+  },
+  {
+    "id": 7,
+    "content": "用户询问「请调用 list_directory 工具列出目录 C:\\Users\\13077\\Desktop\\2026learningproject\\hello-agent…」，共调用 2 个工具完成回答",
+    "tags": [
+      "工具调用"
+    ],
+    "source": "agent",
+    "created_at": "2026-10-14T15:13:49.337028"
   }
 ]
