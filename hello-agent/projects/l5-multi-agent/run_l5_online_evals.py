@@ -130,6 +130,7 @@ def main():
     TRACES_DIR.mkdir(exist_ok=True)
 
     for i, task in enumerate(tasks, 1):
+        global_id = start + i - 1
         print("\n" + "=" * 60)
         print(f"[{i}/{len(tasks)}] {task}")
         print("=" * 60)
@@ -148,7 +149,7 @@ def main():
 
             row = {
                 "approval_mode": "auto",
-                "id": i,
+                "id": global_id,
                 "task": task,
                 "status": result.get("status"),
                 "reason": result.get("reason"),
@@ -160,11 +161,11 @@ def main():
                 "error": "",
             }
 
-            (REPORTS_DIR / f"{i:02d}.md").write_text(
+            (REPORTS_DIR / f"{global_id:02d}.md").write_text(
                 result.get("final_report", ""),
                 encoding="utf-8",
             )
-            write_json(TRACES_DIR / f"{i:02d}.json", result.get("trace", []))
+            write_json(TRACES_DIR / f"{global_id:02d}.json", result.get("trace", []))
 
             print(f"状态：{row['status']}")
             print(f"结束原因：{row['reason']}")
@@ -176,7 +177,7 @@ def main():
         except Exception as e:
             elapsed = round(time.time() - started, 2)
             row = {
-                "id": i,
+                "id": global_id,
                 "task": task,
                 "status": "error",
                 "reason": "",
@@ -195,13 +196,30 @@ def main():
         if i < len(tasks):
             time.sleep(2)
 
+    # 合并历史结果，避免 --start 2 时覆盖任务 1 的记录
+    existing_path = BASE_DIR / "online_results.json"
+    merged_by_id = {}
+    if existing_path.exists():
+        try:
+            for item in json.loads(existing_path.read_text(encoding="utf-8")):
+                if isinstance(item, dict) and "id" in item:
+                    merged_by_id[item["id"]] = item
+        except Exception as e:
+            print(f"警告：历史 online_results.json 无法读取，将重新生成。{e}")
+
+    for row in raw_results:
+        merged_by_id[row["id"]] = row
+
+    rows_for_output = [merged_by_id[k] for k in sorted(merged_by_id)]
+    print(f"\n本次新增 {len(raw_results)} 条，累计记录 {len(rows_for_output)} 条。")
+
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     lines = [
         "# L5 在线评测结果",
         "",
         f"- 运行时间：{now}",
         f"- Python：{sys.version.split()[0]}",
-        f"- 任务数：{len(rows)}",
+        f"- 任务数：{len(rows_for_output)}",
         f"- max_review_loops：{args.max_loops}",
         f"- total_timeout：{args.timeout}s",
         "",
@@ -209,7 +227,7 @@ def main():
         "|---|---|---|---|---:|---:|---:|---:|---|",
     ]
 
-    for row in rows:
+    for row in rows_for_output:
         task = row["task"].replace("|", "\\|")
         error = row["error"].replace("|", "\\|")
         lines.append(
@@ -218,22 +236,35 @@ def main():
             f"{row['report_chars']} | {error} |"
         )
 
-    passed = sum(1 for row in rows if str(row["status"]).startswith("ok"))
+    normal_pass = sum(
+        1 for row in rows_for_output
+        if row.get("reason") == "passed" and "(draft)" not in str(row.get("status", ""))
+    )
+    degraded = sum(
+        1 for row in rows_for_output
+        if row.get("reason") in {"max_loops_force_pass", "stuck_force_pass", "timeout"}
+        or "(draft)" in str(row.get("status", ""))
+    )
+    hard_fail = len(rows_for_output) - normal_pass - degraded
+
+    # 兼容旧变量名（下面的平均耗时代码不使用 passed）
+    passed = normal_pass
     lines += [
         "",
         "## 汇总",
         "",
-        f"- 通过/交付：{passed}",
-        f"- 失败：{len(rows) - passed}",
-        f"- 平均耗时：{round(sum(r['total_time'] for r in rows) / len(rows), 2) if rows else 0}s",
-        f"- 平均 Token：{round(sum(r['total_tokens'] for r in rows) / len(rows), 1) if rows else 0}",
+        f"- 正常通过：{normal_pass}",
+        f"- 降级交付：{degraded}",
+        f"- 硬失败：{hard_fail}",
+        f"- 平均耗时：{round(sum(r['total_time'] for r in rows_for_output) / len(rows_for_output), 2) if rows_for_output else 0}s",
+        f"- 平均 Token：{round(sum(r['total_tokens'] for r in rows_for_output) / len(rows_for_output), 1) if rows_for_output else 0}",
         "",
         "> 详细报告见 `online_reports/`，完整 trace 见 `online_traces/`。",
         "",
     ]
 
     (BASE_DIR / "online_results.md").write_text("\n".join(lines), encoding="utf-8")
-    write_json(BASE_DIR / "online_results.json", raw_results)
+    write_json(BASE_DIR / "online_results.json", rows_for_output)
 
     print("\n" + "=" * 60)
     print("在线评测完成")
@@ -246,6 +277,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
 
 
 

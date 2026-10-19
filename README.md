@@ -71,7 +71,7 @@
 | L5 | 多 Agent + 评测 | 🔵 进行中 | [`projects/l5-multi-agent/`](hello-agent/projects/l5-multi-agent/)（supervisor + 护栏 + trace + Web Search，评测待跑） |
 | L6 | 交付真实项目 | ⬜ 未开始 | [`projects/l6-final-agent/`](hello-agent/projects/l6-final-agent/) |
 
-整体进度约 **71%**。**下一阶段（90 天）**：
+整体进度约 **74%**。**下一阶段（90 天）**：
 
 1. 接入一个真实 MCP server，收尾 L4；
 2. 跑完 L5 的 15 条评测用例并输出总结；
@@ -109,3 +109,5 @@
 ## 相关文档
 
 求职规划（双线策略、学习路线图、作品集、资源清单、时间线）见 [`求职目录/`](求职目录/00-README.md)。
+
+

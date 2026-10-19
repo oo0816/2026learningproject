@@ -1,15 +1,41 @@
 [
   {
+    "approval_mode": "auto",
     "id": 1,
     "task": "帮我研究一下量子计算的最新进展，写一份 500 字报告",
     "status": "ok(stuck_force_pass)",
     "reason": "stuck_force_pass",
     "review_loops": 1,
-    "total_time": 17.68,
-    "total_tokens": 7965,
+    "total_time": 21.12,
+    "total_tokens": 8669,
     "gate_approved": true,
-    "report_chars": 646,
-    "error": "",
-    "approval_mode": "auto"
+    "report_chars": 821,
+    "error": ""
+  },
+  {
+    "approval_mode": "auto",
+    "id": 2,
+    "task": "对比 Python 和 Go 在后端开发中的优劣",
+    "status": "ok",
+    "reason": "passed",
+    "review_loops": 1,
+    "total_time": 29.17,
+    "total_tokens": 10466,
+    "gate_approved": true,
+    "report_chars": 1696,
+    "error": ""
+  },
+  {
+    "approval_mode": "auto",
+    "id": 3,
+    "task": "介绍一下 Docker 和 K8s 的关系",
+    "status": "ok",
+    "reason": "passed",
+    "review_loops": 0,
+    "total_time": 17.31,
+    "total_tokens": 6314,
+    "gate_approved": true,
+    "report_chars": 1999,
+    "error": ""
   }
 ]
